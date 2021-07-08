@@ -11,15 +11,16 @@ dotenv.config();
 client.once('ready', () => {
     console.log('Ready!');
 });
+
 function shuffle(a) {
-   var j, x, i;
-   for (i = a.length - 1; i > 0; i--) {
-               j = Math.floor(Math.random() * (i + 1));
-               x = a[i];
-               a[i] = a[j];
-               a[j] = x;
-           }
-   return a;
+    var j, x, i;
+    for (i = a.length - 1; i > 0; i--) {
+        j = Math.floor(Math.random() * (i + 1));
+        x = a[i];
+        a[i] = a[j];
+        a[j] = x;
+    }
+    return a;
 }
 
 // main
@@ -27,59 +28,19 @@ client.login(process.env.TOKEN);
 
 client.on('message', message => {
     console.log(message.content)
+
     if (message.content === '!ping') {
-        message.channel.send('Pong.')
+        const pingPong = require('./module/ping_pong.js')
+        pingPong(message.content)
+        message.channel.send(pingPong(message.content))
     } else if (message.content.startsWith('!mob')) {
-        const commands = message.content.split(' ') 
-        switch (commands[1]) {
-            case 'help': {
-                message.channel.send(':robot: まず `ready` を使ってね。`start`で開始だよ。後はずっとstartを使ってね。')
-                break
-            }
-            case 'ready': {
-                MEMBERS = []
-                message.member.voice.channel.members.forEach((member) => {
-                    console.log(member.user.username)
-                    MEMBERS.push({'id': member.user.id, 'name': member.user.username})
-                })
-                let text = ':robot: メンバーは '
-                MEMBERS.forEach(member => {text += member.name + " "})
-                message.channel.send(text)
-                break
-            }
-            case 'start': {
-                message.member.voice.channel.members.forEach((member) => {
-                    member[1].setMute(true)
-                })
-                if (INIT) {
-                    message.channel.send(':robot: シャッフルしまーす')
-                    MEMBERS = shuffle(MEMBERS)
-                    let text = ':robot: '
-                    MEMBERS.forEach(member => {text += member.name + " "})
-                    message.channel.send(text)
-                    message.channel.send(':robot: driver => ' + MEMBERS[0].name + ', navigator => ' + MEMBERS[1].name)
-                    INIT = false
-                } else {
-                    message.channel.send(':robot: はじまるよー！')
-                }
-                const msg = () => {
-                    let msg = ':robot: 5分たちました! '
-                    MEMBERS.forEach(member => {
-                        msg += `<@${member.id}> `
-                    })
-                    message.channel.send(msg)
-                    const preDriver = MEMBERS.shift()
-                    MEMBERS.push(preDriver)
-                    message.channel.send(':robot: 次の driver は ' + MEMBERS[0].name + ' ,navigator は ' + MEMBERS[1].name)
-                }
-                const remind_msg = () => {
-                    message.channel.send(':robot: 後1分！！！！！！')
-                }
-                var time = 5
-                setTimeout(remind_msg, (time-1)*60*1000);
-                setTimeout(msg, time*60*1000);
-                break
-            }
+        const mob = require('./module/mob.js')
+        const ret = mob(message)
+        message.channel.send(ret.msg)
+        if (ret.timers) {
+            ret.timers.forEach((timer) => {
+                setTimeout(() => {message.channel.send(timer.message)}, timer.time*60*1000);
+            });
         }
     } else if (message.content.startsWith('!syuzo')) {
         if (message.content.includes('stop')) {
