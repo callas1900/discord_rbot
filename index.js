@@ -12,23 +12,10 @@ client.once('ready', () => {
     console.log('Ready!');
 });
 
-function shuffle(a) {
-    var j, x, i;
-    for (i = a.length - 1; i > 0; i--) {
-        j = Math.floor(Math.random() * (i + 1));
-        x = a[i];
-        a[i] = a[j];
-        a[j] = x;
-    }
-    return a;
-}
-
 // main
 client.login(process.env.TOKEN);
 
 client.on('message', message => {
-    console.log(message.content)
-
     if (message.content === '!ping') {
         const pingPong = require('./module/ping_pong.js')
         pingPong(message.content)

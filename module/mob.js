@@ -43,7 +43,7 @@ module.exports = function(message) {
                 MEMBERS = shuffle(MEMBERS)
                 msg += 'シャッフルしまーす\n'
                 MEMBERS.forEach(member => {msg += member.name + " "})
-                msg += (`\ndriver => ${MEMBERS[0].name}, navigator => ${MEMBERS[0].name}`)
+                msg += (`\ndriver => ${MEMBERS[0].name}, navigator => ${MEMBERS[1].name}`)
                 INIT = false
             } else {
                 msg += 'はじまるよー！'
@@ -55,7 +55,7 @@ module.exports = function(message) {
             // setup for next
             const preDriver = MEMBERS.shift()
             MEMBERS.push(preDriver)
-            timer_msg += `\n:robot: 次の driver は ${MEMBERS[0].name} ,navigator は ${MEMBERS[0].name}`
+            timer_msg += `\n:robot: 次の driver は ${MEMBERS[0].name} ,navigator は ${MEMBERS[1].name}`
             // set timer
             timers.push({ message: timer_msg , time: time })
             timers.push({ message: ':robot: 後1分！！！！！！', time: time-1 })
