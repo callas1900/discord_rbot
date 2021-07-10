@@ -14,7 +14,7 @@ function shuffleArray(array) { let curId = array.length;
 module.exports.exec = function(message) {
     if (message.content.includes('stop')) {
         console.log('stopping syuzo')
-        return {timers: null}
+        return {timers: []}
     } 
     const timers = []
     let count = 0

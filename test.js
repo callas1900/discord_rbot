@@ -15,6 +15,7 @@ test('ping pong', t => {
     const ret = ping.exec(message)
     t.is(ret.msg, 'Pong.')
 })
+
 test('syuzo', t => {
     const message = createMessage('!syuzo')
     const syuzo = require('./module/syuzo.js')
@@ -24,6 +25,12 @@ test('syuzo', t => {
     t.is(ret.timers.length, says.length)
     t.is(ret.timers[0].time, 0)
     t.is(ret.timers[1].time, 60)
+})
+test('syuzo stop', t => {
+    const message = createMessage('!syuzo stop')
+    const syuzo = require('./module/syuzo.js')
+    const ret = syuzo.exec(message)
+    t.is(ret.timers.length, 0)
 })
 
 test('mob help', t => {
@@ -90,4 +97,28 @@ test('factory', t => {
     t.is(factory(message.content).id, 'mob')
     message = createMessage('!syuzo')
     t.is(factory(message.content).id, 'syuzo')
+})
+
+test('timer util', t => {
+    const timerutil = require('./util/timer.js')
+    const task = () => {}
+    const timer1 = { message: 'test-message' , time: 0 }
+    // id check
+    timerutil([timer1], '1', task)
+    t.is(timerutil.list().size, 1)
+    timerutil([timer1], '1', task)
+    t.is(timerutil.list().size, 1)
+    timerutil([timer1], '2', task)
+    t.is(timerutil.list().size, 2)
+    timerutil([timer1], '2', task)
+    t.is(timerutil.list().size, 2)
+    timerutil([timer1], '3', task)
+    t.is(timerutil.list().size, 3)
+    // timer list check
+    t.is(timerutil.list().get('1').length, 2)
+    // clear id-1's list 
+    timerutil([], '1', task)
+    t.is(timerutil.list().get('1').length, 0)
+    t.is(timerutil.list().get('2').length, 2)
+    t.is(timerutil.list().get('3').length, 1)
 })
