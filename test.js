@@ -35,7 +35,7 @@ test('syuzo stop', t => {
 
 test('mob help', t => {
     let message = createMessage('!mob help')
-    const exp = ':robot: まず `ready` を使ってね。`start`で開始だよ。後はずっとstartを使ってね。'
+    const exp = ':robot: まず `ready` を使ってね。`start`で開始だよ。後はずっと`start`を使ってね。\n途中でとめたきゃ`cancel`'
     t.is(mob.exec(message).msg, exp)
 })
 

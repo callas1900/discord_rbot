@@ -12,7 +12,7 @@ module.exports = function(timers, id, task) {
             TIMERS.set(id, [])
         }
         timers.forEach((timer) => {
-            let t = setTimeout(() => {task(timer.message)}, timer.time*1000)
+            let t = setTimeout(() => {task(timer.message)}, timer.time*60*1000)
             TIMERS.get(id).push(t)
         });
     }

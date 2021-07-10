@@ -14,13 +14,9 @@ function shuffle(a) {
 module.exports.exec = function(message) {
     const commands = message.content.split(' ') 
     let msg = ':robot: '
-    let timers = []
+    let timers
     const time = 5
     switch(commands[1]) {
-        case 'help': {
-            msg += 'まず `ready` を使ってね。`start`で開始だよ。後はずっとstartを使ってね。'
-            break
-        }
         case 'ready': { 
             MEMBERS = []
             if (!message.member.voice.channel) {
@@ -35,6 +31,7 @@ module.exports.exec = function(message) {
                 MEMBERS.push({'id': member.user.id, 'name': member.user.username})
             })
             msg += 'メンバーは '
+            timers = []
             MEMBERS.forEach(member => {msg += member.name + " "})
             break
         }
@@ -57,8 +54,18 @@ module.exports.exec = function(message) {
             MEMBERS.push(preDriver)
             timer_msg += `\n:robot: 次の driver は ${MEMBERS[0].name} ,navigator は ${MEMBERS[1].name}`
             // set timer
+            timers = []
             timers.push({ message: timer_msg , time: time })
             timers.push({ message: ':robot: 後1分！！！！！！', time: time-1 })
+            break
+        }
+        case 'cancel': { 
+            msg += 'はいよ！'
+            timers = []
+            break
+        }
+        default: {
+            msg += 'まず `ready` を使ってね。`start`で開始だよ。後はずっと`start`を使ってね。\n途中でとめたきゃ`cancel`'
             break
         }
     }
