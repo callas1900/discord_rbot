@@ -10,8 +10,18 @@ function createMember(name, id=Discord.SnowflakeUtil.generate()){
 }
 
 test('ping pong', t => {
-    const target = require('./module/ping.js')
-    t.is(target('!ping'), 'Pong.')
+    const ping = require('./module/ping.js')
+    t.is(ping('!ping'), 'Pong.')
+})
+test('syuzo', t => {
+    const message = createMessage('!syuzo')
+    const syuzo = require('./module/syuzo.js')
+    const { says } = require('./module/syuzo.config.json')
+    const ret = syuzo.exec(message)
+    t.is(ret.msg, undefined)
+    t.is(ret.timers.length, says.length)
+    t.is(ret.timers[0].time, 0)
+    t.is(ret.timers[1].time, 60)
 })
 
 test('mob help', t => {
