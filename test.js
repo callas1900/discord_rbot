@@ -10,7 +10,7 @@ function createMember(name, id=Discord.SnowflakeUtil.generate()){
 }
 
 test('ping pong', t => {
-    const target = require('./module/ping_pong.js')
+    const target = require('./module/ping.js')
     t.is(target('!ping'), 'Pong.')
 })
 

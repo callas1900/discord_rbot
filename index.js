@@ -17,9 +17,9 @@ client.login(process.env.TOKEN);
 
 client.on('message', message => {
     if (message.content === '!ping') {
-        const pingPong = require('./module/ping_pong.js')
-        pingPong(message.content)
-        message.channel.send(pingPong(message.content))
+        const ping = require('./module/ping.js')
+        ping(message.content)
+        message.channel.send(ping(message.content))
     } else if (message.content.startsWith('!mob')) {
         const mob = require('./module/mob.js')
         const ret = mob(message)
