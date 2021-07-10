@@ -16,10 +16,9 @@ module.exports.exec = function(message) {
         console.log('stopping syuzo')
         return {timers: null}
     } 
-    timers = []
+    const timers = []
     let count = 0
     let args = shuffleArray(says)
-    console.log(args)
     args.forEach(say => {
         const msg = `松岡修造「${say}」`
         timers.push({message: msg, time: count*60})

@@ -11,7 +11,9 @@ function createMember(name, id=Discord.SnowflakeUtil.generate()){
 
 test('ping pong', t => {
     const ping = require('./module/ping.js')
-    t.is(ping('!ping'), 'Pong.')
+    const message = createMessage('!ping')
+    const ret = ping.exec(message)
+    t.is(ret.msg, 'Pong.')
 })
 test('syuzo', t => {
     const message = createMessage('!syuzo')
@@ -27,13 +29,13 @@ test('syuzo', t => {
 test('mob help', t => {
     let message = createMessage('!mob help')
     const exp = ':robot: まず `ready` を使ってね。`start`で開始だよ。後はずっとstartを使ってね。'
-    t.is(mob(message).msg, exp)
+    t.is(mob.exec(message).msg, exp)
 })
 
 test('mob ready (not joining voice chat)', t => {
     let message = createMessage('!mob ready')
     const exp = ':robot: voice チャンネルにjoinしてください'
-    t.is(mob(message).msg, exp)
+    t.is(mob.exec(message).msg, exp)
 })
 
 test('mob ready (user is alone)', t => {
@@ -41,22 +43,22 @@ test('mob ready (user is alone)', t => {
     members.set('aaaa', createMember('aaa'))
     let message = createMessage('!mob ready', {members: members})
     const exp = ':robot: ぼっちなのでモブ出来ません'
-    t.is(mob(message).msg, exp)
+    t.is(mob.exec(message).msg, exp)
 })
 
 test('mob ready', t => {
     let message = createMessage('!mob ready', {members: [
         createMember('aaa'), createMember('bbb'), createMember('ccc')]})
-    t.is(mob(message).msg, ':robot: メンバーは aaa bbb ccc ')
+    t.is(mob.exec(message).msg, ':robot: メンバーは aaa bbb ccc ')
 })
 test('mob start', t => {
     // ready
     let message = createMessage('!mob ready', {members: [
         createMember('aaa'), createMember('bbb'), createMember('ccc')]})
-    mob(message)
+    mob.exec(message)
     // start
     message = createMessage('!mob start')
-    const ret = mob(message)
+    const ret = mob.exec(message)
     const splited = ret.msg.split('\n')
     t.is(splited[0], ':robot: シャッフルしまーす')
     t.regex(splited[1], /... ... .../)
@@ -69,8 +71,23 @@ test('mob start', t => {
     t.regex(timer_message[1], /:robot: 次の driver は ... ,navigator は .../)
     t.is(ret.timers[1].message, ':robot: 後1分！！！！！！')
     // continue
-    t.is(mob(message).msg, ':robot: はじまるよー！')
-    t.is(mob(message).msg, ':robot: はじまるよー！')
-    t.is(mob(message).msg, ':robot: はじまるよー！')
+    t.is(mob.exec(message).msg, ':robot: はじまるよー！')
+    t.is(mob.exec(message).msg, ':robot: はじまるよー！')
+    t.is(mob.exec(message).msg, ':robot: はじまるよー！')
 })
 
+test('factory no command', t => {
+    const factory = require('./module/factory.js')
+    const message = createMessage('ping')
+    t.is(factory(message.content), undefined)
+})
+
+test('factory', t => {
+    const factory = require('./module/factory.js')
+    let message = createMessage('!ping')
+    t.is(factory(message.content).id, 'ping')
+    message = createMessage('!mob')
+    t.is(factory(message.content).id, 'mob')
+    message = createMessage('!syuzo')
+    t.is(factory(message.content).id, 'syuzo')
+})

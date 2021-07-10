@@ -11,7 +11,7 @@ function shuffle(a) {
     return a;
 }
 
-module.exports = function(message) {
+module.exports.exec = function(message) {
     const commands = message.content.split(' ') 
     let msg = ':robot: '
     let timers = []

@@ -2,6 +2,7 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const dotenv = require('dotenv');
+const factory = require('./module/factory.js');
 dotenv.config();
 
 client.once('ready', () => {
@@ -12,29 +13,17 @@ client.once('ready', () => {
 client.login(process.env.TOKEN);
 
 client.on('message', message => {
-    if (message.content === '!ping') {
-        const ping = require('./module/ping.js')
-        ping(message.content)
-        message.channel.send(ping(message.content))
-    } else if (message.content.startsWith('!mob')) {
-        const mob = require('./module/mob.js')
-        const ret = mob(message)
+    const cmd = factory(message.content)
+    if (!cmd) {
+        return
+    }
+    const ret = cmd.exec(message)
+    if (ret.msg) {
         message.channel.send(ret.msg)
-        if (ret.timers) {
-            ret.timers.forEach((timer) => {
-                setTimeout(() => {message.channel.send(timer.message)}, timer.time*60*1000);
-            });
-        }
-    } else if (message.content.startsWith('!syuzo')) {
-        const syuzo = require('./module/syuzo.js')
-        const ret = syuzo.exec(message)
-        if (ret.msg) {
-            message.channel.send(ret.msg)
-        }
-        if (ret.timers) {
-            ret.timers.forEach((timer) => {
-                setTimeout(() => {message.channel.send(timer.message)}, timer.time*60*1000);
-            });
-        }
+    }
+    if (ret.timers) {
+        ret.timers.forEach((timer) => {
+            setTimeout(() => {message.channel.send(timer.message)}, timer.time*60*1000);
+        });
     }
 });
