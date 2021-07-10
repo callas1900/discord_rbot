@@ -2,10 +2,6 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const dotenv = require('dotenv');
-var CONTINUE = false;
-var count = 0;
-var MEMBERS = [];
-var INIT = true;
 dotenv.config();
 
 client.once('ready', () => {
@@ -30,26 +26,15 @@ client.on('message', message => {
             });
         }
     } else if (message.content.startsWith('!syuzo')) {
-        if (message.content.includes('stop')) {
-            console.log('stopping syuzo')
-            count = 0
-            CONTINUE=false
-            return
-        } 
-        console.log('booting syuzo')
-        const { says } = require('./module/syuzo.json')
-        CONTINUE=true
-        const sayit = () => {
-            if (CONTINUE) {
-                message.channel.send('松岡修造「' + says[count] + '」')
-                count = count + 1
-                if (count === 4) {
-                    count = 0
-                }
-                console.log('set next syuzo')
-                setTimeout(sayit, 3600*1000);
-            }
+        const syuzo = require('./module/syuzo.js')
+        const ret = syuzo.exec(message)
+        if (ret.msg) {
+            message.channel.send(ret.msg)
         }
-        sayit
+        if (ret.timers) {
+            ret.timers.forEach((timer) => {
+                setTimeout(() => {message.channel.send(timer.message)}, timer.time*60*1000);
+            });
+        }
     }
 });
