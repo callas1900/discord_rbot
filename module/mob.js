@@ -18,7 +18,6 @@ module.exports.exec = async function(message) {
     const commands = message.content.split(' ') 
     let msg = ':robot: '
     let timers
-    const time = 5
     switch(commands[1]) {
         case 'ready': { 
             MEMBERS = []
@@ -46,6 +45,11 @@ module.exports.exec = async function(message) {
             break
         }
         case 'start': { 
+            const time = commands[2] ? (isNaN(commands[2])) ? -99 : eval(commands[2]) : 5
+            if (time < 2 || time > 30) {
+                msg += '入力値は2以上、30以下です。'
+                break
+            }
             if (INIT) {
                 MEMBERS = shuffle(MEMBERS)
                 msg += 'シャッフルしまーす\n'
@@ -55,7 +59,7 @@ module.exports.exec = async function(message) {
             } else {
                 msg += 'はじまるよー！'
             }
-            let timer_msg = ':robot: 5分たちました! '
+            let timer_msg = `:robot: ${time}分たちました! `
             MEMBERS.forEach(member => {
                 timer_msg += `<@${member.id}> `
             })

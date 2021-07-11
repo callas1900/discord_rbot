@@ -87,6 +87,39 @@ test('mob start', async t => {
     t.is((await mob.exec(message)).msg, ':robot: はじまるよー！')
 })
 
+test('mob start with number', async t => {
+    // ready
+    let message = createMessage('!mob ready', ['aaa', 'bbb', 'ccc'])
+    t.is((await mob.exec(message)).msg, ':robot: メンバーは aaa bbb ccc ')
+    // start
+    message = createMessage('!mob start 4')
+    const ret = await mob.exec(message)
+    t.is(ret.timers.length, 2)
+    t.like(ret.timers[0], {
+        time: 4,
+        sound: './assets/horn.mp3'
+    })
+    t.regex(ret.timers[0].message, /:robot: 4分たちました! <@[0-9].+> <@[0-9].+> <@[0-9].+> \n:robot: 次の driver は ... ,navigator は .../)
+    t.like(ret.timers[1], {
+        time: 3,
+        sound: undefined
+    })
+    t.is(ret.timers[1].message, ':robot: 後1分！！！！！！')
+    message = createMessage('!mob start 2')
+    t.is((await mob.exec(message)).timers[0].time, 2)
+    message = createMessage('!mob start 1')
+    t.is((await mob.exec(message)).timers, undefined)
+    t.is((await mob.exec(message)).msg, ':robot: 入力値は2以上、30以下です。')
+    message = createMessage('!mob start 30')
+    t.is((await mob.exec(message)).timers[0].time, 30)
+    message = createMessage('!mob start 31')
+    t.is((await mob.exec(message)).timers, undefined)
+    t.is((await mob.exec(message)).msg, ':robot: 入力値は2以上、30以下です。')
+    message = createMessage('!mob start aaa')
+    t.is((await mob.exec(message)).timers, undefined)
+    t.is((await mob.exec(message)).msg, ':robot: 入力値は2以上、30以下です。')
+})
+
 test('factory no command', t => {
     const factory = require('./module/factory.js')
     const message = createMessage('ping')
