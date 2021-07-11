@@ -1,5 +1,8 @@
+const dotenv = require('dotenv')
+dotenv.config()
 var MEMBERS = []
 var INIT = true
+const DEBUG = process.env.DEBUG
 function shuffle(a) {
     var j, x, i;
     for (i = a.length - 1; i > 0; i--) {
@@ -23,7 +26,7 @@ module.exports.exec = function(message) {
                 msg += 'voice チャンネルにjoinしてください'
                 break
             }
-            if (message.member.voice.channel.members.size < 2) {
+            if (!DEBUG && message.member.voice.channel.members.size < 2) {
                 msg += 'ぼっちなのでモブ出来ません'
                 break
             }
@@ -40,7 +43,7 @@ module.exports.exec = function(message) {
                 MEMBERS = shuffle(MEMBERS)
                 msg += 'シャッフルしまーす\n'
                 MEMBERS.forEach(member => {msg += member.name + " "})
-                msg += (`\ndriver => ${MEMBERS[0].name}, navigator => ${MEMBERS[1].name}`)
+                msg += (`\ndriver => ${MEMBERS[0].name}, navigator => ${MEMBERS[(DEBUG) ? 0 : 1].name}`)
                 INIT = false
             } else {
                 msg += 'はじまるよー！'
@@ -52,7 +55,7 @@ module.exports.exec = function(message) {
             // setup for next
             const preDriver = MEMBERS.shift()
             MEMBERS.push(preDriver)
-            timer_msg += `\n:robot: 次の driver は ${MEMBERS[0].name} ,navigator は ${MEMBERS[1].name}`
+            timer_msg += `\n:robot: 次の driver は ${MEMBERS[0].name} ,navigator は ${MEMBERS[(DEBUG) ? 0 : 1].name}`
             // set timer
             timers = []
             timers.push({ message: timer_msg , time: time })

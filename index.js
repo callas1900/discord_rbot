@@ -2,9 +2,9 @@
 const Discord = require('discord.js')
 const client = new Discord.Client()
 const dotenv = require('dotenv')
+dotenv.config()
 const factory = require('./module/factory.js')
 const timerutil = require('./util/timer.js')
-dotenv.config()
 
 client.once('ready', () => { console.log('Ready!') })
 client.on('message', message => {
