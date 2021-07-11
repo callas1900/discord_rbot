@@ -15,7 +15,7 @@ function shuffle(a) {
     return a;
 }
 
-module.exports.exec = function(message) {
+module.exports.exec = async function(message) {
     const commands = message.content.split(' ') 
     let msg = ':robot: '
     let timers
@@ -39,12 +39,11 @@ module.exports.exec = function(message) {
             MEMBERS.forEach(member => {
                 if (member.name != 'rbot') { msg += member.name + " " }
             })
-            const join = async (vc) => {
-                const connection = await vc.join()
-                connection.play('./assets/car.mp3')
-                CONNECTION = connection
+            CONNECTION = await message.member.voice.channel.join()
+            console.log(CONNECTION)
+            if (CONNECTION) {
+                CONNECTION.play('./assets/car.mp3')
             }
-            join(message.voice.channel)
             break
         }
         case 'start': { 

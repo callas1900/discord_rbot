@@ -7,13 +7,18 @@ const factory = require('./module/factory.js')
 const timerutil = require('./util/timer.js')
 
 client.once('ready', () => { console.log('Ready!') })
-client.on('message', message => {
+client.on('message', async message => {
+    if (!message.content.startsWith('!') || message.author.bot) { return }
     const cmd = factory(message.content)
     if (!cmd) { return }
-    const ret = cmd.exec(message)
-    if (ret.msg) { message.channel.send(ret.msg) }
-    if (ret.timers) {
-        timerutil(ret.timers, cmd.id, (m) => { message.channel.send(m) })
+    try {
+        const ret = await cmd.exec(message)
+        if (ret.msg) { message.channel.send(ret.msg) }
+        if (ret.timers) {
+            timerutil(ret.timers, cmd.id, (m) => { message.channel.send(m) })
+        }
+    } catch (error) {
+        console.error(error)
     }
 });
 

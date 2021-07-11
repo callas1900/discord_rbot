@@ -2,9 +2,14 @@ const test = require('ava')
 const Discord = require('discord.js');
 const mob = require('./module/mob.js')
 
-function createMessage(text, data=null){
-    return { content:text, member: {voice: {channel: data}} }
+function createMessage(text, names=[]){
+    const members = []
+    names.forEach((name)=>{
+        members.push(createMember(name))
+    })
+    return { content:text, member: {voice: {channel:{ members: members, join: ()=>{console.log('join') }}}}}
 }
+
 function createMember(name, id=Discord.SnowflakeUtil.generate()){
     return { user:{id: id, username: name} }
 }
@@ -33,40 +38,36 @@ test('syuzo stop', t => {
     t.is(ret.timers.length, 0)
 })
 
-test('mob help', t => {
+test('mob help', async t => {
     let message = createMessage('!mob help')
     const exp = ':robot: まず `ready` を使ってね。`start`で開始だよ。後はずっと`start`を使ってね。\n途中でとめたきゃ`cancel`'
-    t.is(mob.exec(message).msg, exp)
+    t.is((await mob.exec(message)).msg, exp)
 })
 
-test('mob ready (not joining voice chat)', t => {
+test('mob ready (not joining voice chat)', async t => {
     let message = createMessage('!mob ready')
     const exp = ':robot: voice チャンネルにjoinしてください'
-    t.is(mob.exec(message).msg, exp)
+    t.is((await mob.exec(message)).msg, exp)
 })
 
-test('mob ready (user is alone)', t => {
-    const members = new Map()
-    members.set('aaaa', createMember('aaa'))
-    let message = createMessage('!mob ready', {members: members})
+test('mob ready (user is alone)', async t => {
+    let message = createMessage('!mob ready', ['aaa'])
     const exp = ':robot: ぼっちなのでモブ出来ません'
-    t.is(mob.exec(message).msg, exp)
+    t.is((await mob.exec(message)).msg, exp)
 })
 
-test('mob ready', t => {
-    let message = createMessage('!mob ready', {members: [
-        createMember('aaa'), createMember('bbb'), createMember('ccc')]})
-    t.is(mob.exec(message).msg, ':robot: メンバーは aaa bbb ccc ')
+test('mob ready', async t => {
+    let message = createMessage('!mob ready', ['aaa', 'bbb', 'ccc'])
+    t.is((await mob.exec(message)).msg, ':robot: メンバーは aaa bbb ccc ')
 })
 
-test('mob start', t => {
+test('mob start', async t => {
     // ready
-    let message = createMessage('!mob ready', {members: [
-        createMember('aaa'), createMember('bbb'), createMember('ccc')]})
-    mob.exec(message)
+    let message = createMessage('!mob ready', ['aaa', 'bbb', 'ccc'])
+    t.is((await mob.exec(message)).msg, ':robot: メンバーは aaa bbb ccc ')
     // start
     message = createMessage('!mob start')
-    const ret = mob.exec(message)
+    const ret = await mob.exec(message)
     const splited = ret.msg.split('\n')
     t.is(splited[0], ':robot: シャッフルしまーす')
     t.regex(splited[1], /... ... .../)
@@ -79,9 +80,9 @@ test('mob start', t => {
     t.regex(timer_message[1], /:robot: 次の driver は ... ,navigator は .../)
     t.is(ret.timers[1].message, ':robot: 後1分！！！！！！')
     // continue
-    t.is(mob.exec(message).msg, ':robot: はじまるよー！')
-    t.is(mob.exec(message).msg, ':robot: はじまるよー！')
-    t.is(mob.exec(message).msg, ':robot: はじまるよー！')
+    t.is((await mob.exec(message)).msg, ':robot: はじまるよー！')
+    t.is((await mob.exec(message)).msg, ':robot: はじまるよー！')
+    t.is((await mob.exec(message)).msg, ':robot: はじまるよー！')
 })
 
 test('factory no command', t => {
