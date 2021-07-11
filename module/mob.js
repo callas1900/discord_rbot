@@ -1,9 +1,8 @@
 const dotenv = require('dotenv')
 dotenv.config()
 var MEMBERS = []
-var CONNECTION
 var INIT = true
-const DEBUG = process.env.DEBUG
+const DEBUG = process.env.DEBUG === 'true'
 function shuffle(a) {
     var j, x, i;
     for (i = a.length - 1; i > 0; i--) {
@@ -39,10 +38,10 @@ module.exports.exec = async function(message) {
             MEMBERS.forEach(member => {
                 if (member.name != 'rbot') { msg += member.name + " " }
             })
-            CONNECTION = await message.member.voice.channel.join()
-            console.log(CONNECTION)
-            if (CONNECTION) {
-                CONNECTION.play('./assets/car.mp3')
+            try {
+                (await message.member.voice.channel.join()).play('./assets/car.mp3')
+            } catch (error) {
+                console.error(error)
             }
             break
         }
@@ -66,7 +65,7 @@ module.exports.exec = async function(message) {
             timer_msg += `\n:robot: 次の driver は ${MEMBERS[0].name} ,navigator は ${MEMBERS[(DEBUG) ? 0 : 1].name}`
             // set timer
             timers = []
-            timers.push({ message: timer_msg , time: time })
+            timers.push({ message: timer_msg , time: time, sound: './assets/horn.mp3'})
             timers.push({ message: ':robot: 後1分！！！！！！', time: time-1 })
             break
         }

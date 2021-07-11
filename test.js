@@ -3,11 +3,14 @@ const Discord = require('discord.js');
 const mob = require('./module/mob.js')
 
 function createMessage(text, names=[]){
-    const members = []
-    names.forEach((name)=>{
-        members.push(createMember(name))
+    const members = new Map()
+    names.forEach((name)=> {
+        members.set(Discord.SnowflakeUtil.generate(), createMember(name))
     })
-    return { content:text, member: {voice: {channel:{ members: members, join: ()=>{console.log('join') }}}}}
+    return { content:text, member: { voice: { channel: { 
+        members: members, 
+        join: (()=>{ return {play: (file) => {console.log(file)}}})
+    }}}}
 }
 
 function createMember(name, id=Discord.SnowflakeUtil.generate()){
@@ -45,15 +48,13 @@ test('mob help', async t => {
 })
 
 test('mob ready (not joining voice chat)', async t => {
-    let message = createMessage('!mob ready')
-    const exp = ':robot: voice チャンネルにjoinしてください'
-    t.is((await mob.exec(message)).msg, exp)
+    let message = { content:'!mob ready', member: { voice: {channel: null}}}
+    t.is((await mob.exec(message)).msg, ':robot: voice チャンネルにjoinしてください')
 })
 
 test('mob ready (user is alone)', async t => {
     let message = createMessage('!mob ready', ['aaa'])
-    const exp = ':robot: ぼっちなのでモブ出来ません'
-    t.is((await mob.exec(message)).msg, exp)
+    t.is((await mob.exec(message)).msg, ':robot: ぼっちなのでモブ出来ません')
 })
 
 test('mob ready', async t => {
