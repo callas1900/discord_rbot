@@ -69,16 +69,17 @@ test('mob start', async t => {
     // start
     message = createMessage('!mob start')
     const ret = await mob.exec(message)
-    const splited = ret.msg.split('\n')
-    t.is(splited[0], ':robot: シャッフルしまーす')
-    t.regex(splited[1], /... ... .../)
-    t.regex(splited[2], /driver => ..., navigator => .../)
+    t.regex(ret.msg, /:robot: シャッフルしまーす\n... ... ... \ndriver => ..., navigator => .../)
     t.is(ret.timers.length, 2)
-    t.is(ret.timers[0].time, 5)
-    t.is(ret.timers[1].time, 4)
-    const timer_message = ret.timers[0].message.split('\n')
-    t.regex(timer_message[0], /:robot: 5分たちました! <@[0-9].+> <@[0-9].+> <@[0-9].+>/)
-    t.regex(timer_message[1], /:robot: 次の driver は ... ,navigator は .../)
+    t.like(ret.timers[0], {
+        time: 5,
+        sound: './assets/horn.mp3'
+    })
+    t.regex(ret.timers[0].message, /:robot: 5分たちました! <@[0-9].+> <@[0-9].+> <@[0-9].+> \n:robot: 次の driver は ... ,navigator は .../)
+    t.like(ret.timers[1], {
+        time: 4,
+        sound: undefined
+    })
     t.is(ret.timers[1].message, ':robot: 後1分！！！！！！')
     // continue
     t.is((await mob.exec(message)).msg, ':robot: はじまるよー！')
@@ -124,4 +125,15 @@ test('timer util', t => {
     t.is(timerutil.list().get('1').length, 0)
     t.is(timerutil.list().get('2').length, 2)
     t.is(timerutil.list().get('3').length, 1)
+})
+
+test('timer util with sound', t => {
+    const timerutil = require('./util/timer.js')
+    const task = () => {}
+    const voice = (s) => {t.is(s, '')}
+    const timer = { message: 'test-message' , time: 0, sound: 'test-sound' }
+    timerutil([timer], '1', task)
+    t.is(timerutil.list().get('1').length, 1)
+    timerutil([timer], '1', task, voice)
+    t.is(timerutil.list().get('1').length, 2)
 })

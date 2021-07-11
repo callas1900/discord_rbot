@@ -7,7 +7,7 @@ function clear(id) {
     }
 }
 const TIMERS = new Map()
-module.exports = function(timers, id, task, voice) {
+module.exports = function(timers, id, task, voice=null) {
     if (timers.length === 0) {
         clear(id)
     } else {
@@ -19,7 +19,7 @@ module.exports = function(timers, id, task, voice) {
             if (timer.sound) {
                 order = () => {
                     task(timer.message)
-                    voice(timer.sound)
+                    if (voice) { voice(timer.sound) }
                 }
             } else {
                 order = () => { task(timer.message) }
