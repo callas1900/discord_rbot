@@ -58,6 +58,7 @@ test('mob ready', t => {
         createMember('aaa'), createMember('bbb'), createMember('ccc')]})
     t.is(mob.exec(message).msg, ':robot: メンバーは aaa bbb ccc ')
 })
+
 test('mob start', t => {
     // ready
     let message = createMessage('!mob ready', {members: [

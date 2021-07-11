@@ -1,6 +1,7 @@
 const dotenv = require('dotenv')
 dotenv.config()
 var MEMBERS = []
+var CONNECTION
 var INIT = true
 const DEBUG = process.env.DEBUG
 function shuffle(a) {
@@ -35,7 +36,15 @@ module.exports.exec = function(message) {
             })
             msg += 'メンバーは '
             timers = []
-            MEMBERS.forEach(member => {msg += member.name + " "})
+            MEMBERS.forEach(member => {
+                if (member.name != 'rbot') { msg += member.name + " " }
+            })
+            const join = async (vc) => {
+                const connection = await vc.join()
+                connection.play('./assets/car.mp3')
+                CONNECTION = connection
+            }
+            join(message.voice.channel)
             break
         }
         case 'start': { 
