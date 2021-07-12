@@ -2,12 +2,17 @@ const test = require('ava')
 const Discord = require('discord.js');
 const mob = require('./module/mob.js')
 
-function createMessage(text, names=[]){
+function createMessageChain(message, text, names=[]){
+    return createMessage(text, names, message.member.voice.channel.id)
+}
+
+function createMessage(text, names=[], id=Discord.SnowflakeUtil.generate()){
     const members = new Map()
     names.forEach((name)=> {
         members.set(Discord.SnowflakeUtil.generate(), createMember(name))
     })
     return { content:text, member: { voice: { channel: { 
+        id: id,
         members: members, 
         join: (()=>{ return {play: (file) => {console.log(file)}}})
     }}}}
@@ -57,9 +62,19 @@ test('mob ready (user is alone)', async t => {
     t.is((await mob.exec(message)).msg, ':robot: ぼっちなのでモブ出来ません')
 })
 
+test('mob start initialization', async t => {
+    const message = createMessage('!mob start')
+    const ret = await mob.exec(message)
+    t.is(ret.msg, ':robot: `!mob ready` を先に実行してください')
+    t.is(ret.timers, undefined)
+})
+
 test('mob ready', async t => {
     let message = createMessage('!mob ready', ['aaa', 'bbb', 'ccc'])
     t.is((await mob.exec(message)).msg, ':robot: メンバーは aaa bbb ccc ')
+    message = createMessageChain(message, '!mob start')
+    const ret = await mob.exec(message)
+    t.regex(ret.msg, /:robot: シャッフルしまーす\n... ... ... \ndriver => ..., navigator => .../)
 })
 
 test('mob start', async t => {
@@ -67,7 +82,7 @@ test('mob start', async t => {
     let message = createMessage('!mob ready', ['aaa', 'bbb', 'ccc'])
     t.is((await mob.exec(message)).msg, ':robot: メンバーは aaa bbb ccc ')
     // start
-    message = createMessage('!mob start')
+    message = createMessageChain(message, '!mob start')
     const ret = await mob.exec(message)
     t.regex(ret.msg, /:robot: シャッフルしまーす\n... ... ... \ndriver => ..., navigator => .../)
     t.is(ret.timers.length, 2)
@@ -89,11 +104,11 @@ test('mob start', async t => {
 
 test('mob start with number', async t => {
     // ready
-    let message = createMessage('!mob ready', ['aaa', 'bbb', 'ccc'])
+    const message = createMessage('!mob ready', ['aaa', 'bbb', 'ccc'])
     t.is((await mob.exec(message)).msg, ':robot: メンバーは aaa bbb ccc ')
     // start
-    message = createMessage('!mob start 4')
-    const ret = await mob.exec(message)
+    const message2 = createMessageChain(message, '!mob start 4')
+    const ret = await mob.exec(message2)
     t.is(ret.timers.length, 2)
     t.like(ret.timers[0], {
         time: 4,
@@ -105,19 +120,19 @@ test('mob start with number', async t => {
         sound: undefined
     })
     t.is(ret.timers[1].message, ':robot: 後1分！！！！！！')
-    message = createMessage('!mob start 2')
-    t.is((await mob.exec(message)).timers[0].time, 2)
-    message = createMessage('!mob start 1')
-    t.is((await mob.exec(message)).timers, undefined)
-    t.is((await mob.exec(message)).msg, ':robot: 入力値は2以上、30以下です。')
-    message = createMessage('!mob start 30')
-    t.is((await mob.exec(message)).timers[0].time, 30)
-    message = createMessage('!mob start 31')
-    t.is((await mob.exec(message)).timers, undefined)
-    t.is((await mob.exec(message)).msg, ':robot: 入力値は2以上、30以下です。')
-    message = createMessage('!mob start aaa')
-    t.is((await mob.exec(message)).timers, undefined)
-    t.is((await mob.exec(message)).msg, ':robot: 入力値は2以上、30以下です。')
+    const message3 = createMessageChain(message, '!mob start 2')
+    t.is((await mob.exec(message3)).timers[0].time, 2)
+    const message4 = createMessageChain(message, '!mob start 1')
+    t.is((await mob.exec(message4)).timers, undefined)
+    t.is((await mob.exec(message4)).msg, ':robot: 入力値は2以上、30以下です。')
+    const message5 = createMessageChain(message, '!mob start 30')
+    t.is((await mob.exec(message5)).timers[0].time, 30)
+    const message6 = createMessageChain(message, '!mob start 31')
+    t.is((await mob.exec(message6)).timers, undefined)
+    t.is((await mob.exec(message6)).msg, ':robot: 入力値は2以上、30以下です。')
+    const message7 = createMessageChain(message, '!mob start aaa')
+    t.is((await mob.exec(message7)).timers, undefined)
+    t.is((await mob.exec(message7)).msg, ':robot: 入力値は2以上、30以下です。')
 })
 
 test('factory no command', t => {

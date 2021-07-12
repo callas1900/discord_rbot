@@ -1,5 +1,5 @@
-var MEMBERS = []
-var INIT = true
+var MEMBERS = new Map() 
+var INIT = new Map()
 let DEBUG = false
 function shuffle(a) {
     var j, x, i;
@@ -12,13 +12,35 @@ function shuffle(a) {
     return a;
 }
 
+function setINIT(message, bool=true) {
+    INIT.set(message.member.voice.channel.id, bool)
+}
+
+function getINIT(message) {
+    return INIT.get(message.member.voice.channel.id)
+}
+
+function setMEMBERS(message, array=[]) {
+    MEMBERS.set(message.member.voice.channel.id, array)
+}
+
+function getMEMBERS(message) {
+    return MEMBERS.get(message.member.voice.channel.id)
+}
+
+function init(message) {
+    setMEMBERS(message)
+    setINIT(message)
+}
+
+module.exports.getMembers = () => { return MEMBERS }
+
 module.exports.exec = async function(message) {
     const commands = message.content.split(' ') 
     let msg = ':robot: '
     let timers
     switch(commands[1]) {
         case 'ready': { 
-            MEMBERS = []
             if (!message.member.voice.channel) {
                 msg += 'voice チャンネルにjoinしてください'
                 break
@@ -27,14 +49,17 @@ module.exports.exec = async function(message) {
                 msg += 'ぼっちなのでモブ出来ません'
                 break
             }
+            init(message)
+            const members = []
             message.member.voice.channel.members.forEach((member) => {
-                MEMBERS.push({'id': member.user.id, 'name': member.user.username})
+                members.push({'id': member.user.id, 'name': member.user.username})
             })
             msg += 'メンバーは '
             timers = []
-            MEMBERS.forEach(member => {
+            members.forEach(member => {
                 if (member.name != 'rbot') { msg += member.name + " " }
             })
+            setMEMBERS(message, members)
             try {
                 (await message.member.voice.channel.join()).play('./assets/car.mp3')
             } catch (error) {
@@ -44,31 +69,37 @@ module.exports.exec = async function(message) {
         }
         case 'start': { 
             const time = commands[2] ? (isNaN(commands[2])) ? -99 : eval(commands[2]) : 5
+            let members = getMEMBERS(message)
             if (time < 2 || time > 30) {
                 msg += '入力値は2以上、30以下です。'
                 break
             }
-            if (INIT) {
-                MEMBERS = shuffle(MEMBERS)
+            if (!members || members.length === 0) {
+                msg += '`!mob ready` を先に実行してください'
+                break
+            }
+            if (getINIT(message)) {
+                members = shuffle(members)
                 msg += 'シャッフルしまーす\n'
-                MEMBERS.forEach(member => {msg += member.name + " "})
-                msg += (`\ndriver => ${MEMBERS[0].name}, navigator => ${MEMBERS[(DEBUG) ? 0 : 1].name}`)
-                INIT = false
+                members.forEach(member => {msg += member.name + " "})
+                msg += (`\ndriver => ${members[0].name}, navigator => ${members[(DEBUG) ? 0 : 1].name}`)
+                setINIT(message, false)
             } else {
                 msg += 'はじまるよー！'
             }
             let timer_msg = `:robot: ${time}分たちました! `
-            MEMBERS.forEach(member => {
+            members.forEach(member => {
                 timer_msg += `<@${member.id}> `
             })
             // setup for next
-            const preDriver = MEMBERS.shift()
-            MEMBERS.push(preDriver)
-            timer_msg += `\n:robot: 次の driver は ${MEMBERS[0].name} ,navigator は ${MEMBERS[(DEBUG) ? 0 : 1].name}`
+            const preDriver = members.shift()
+            members.push(preDriver)
+            timer_msg += `\n:robot: 次の driver は ${members[0].name} ,navigator は ${members[(DEBUG) ? 0 : 1].name}`
             // set timer
             timers = []
             timers.push({ message: timer_msg , time: time, sound: './assets/horn.mp3'})
             timers.push({ message: ':robot: 後1分！！！！！！', time: time-1 })
+            setMEMBERS(message, members)
             break
         }
         case 'cancel': { 
@@ -95,6 +126,6 @@ module.exports.exec = async function(message) {
             break
         }
     }
-   return {msg: msg, timers: timers}
+    return {msg: msg, timers: timers}
 }
 
