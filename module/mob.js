@@ -1,8 +1,6 @@
-const dotenv = require('dotenv')
-dotenv.config()
 var MEMBERS = []
 var INIT = true
-const DEBUG = process.env.DEBUG === 'true'
+let DEBUG = false
 function shuffle(a) {
     var j, x, i;
     for (i = a.length - 1; i > 0; i--) {
@@ -76,6 +74,20 @@ module.exports.exec = async function(message) {
         case 'cancel': { 
             msg += 'はいよ！'
             timers = []
+            break
+        }
+        case 'debug': { 
+            msg += '\nMEMBERS:\n'
+            msg += MEMBERS
+            msg += '\nINIT:\n'
+            msg += INIT
+            msg += '\nDEBUG:\n'
+            msg += DEBUG
+            if (commands[2]) {
+                DEBUG = commands[2] === 'true'
+                msg += '\n!DEBUG: <= '
+                msg += DEBUG
+            }
             break
         }
         default: {
