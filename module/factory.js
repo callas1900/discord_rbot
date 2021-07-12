@@ -3,10 +3,12 @@ module.exports = function(text) {
     if (text === '!ping') {
         cmd = require('./ping.js')
         cmd.id = 'ping'
-    } else if (text.startsWith('!mob')) {
+    }
+    else if (text.startsWith('!mob')) {
         cmd = require('./mob.js')
         cmd.id = 'mob'
-    } else if (text.startsWith('!syuzo')) {
+    }
+    else if (text.startsWith('!syuzo')) {
         cmd = require('./syuzo.js')
         cmd.id = 'syuzo'
     }

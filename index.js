@@ -15,13 +15,14 @@ client.on('message', async message => {
         const ret = await cmd.exec(message)
         if (ret.msg) { message.channel.send(ret.msg) }
         if (ret.timers) {
-            timerutil(ret.timers, cmd.id, 
-                (m) => { message.channel.send(m) }, 
+            timerutil(ret.timers, cmd.id,
+                (m) => { message.channel.send(m) },
                 async (s) => { (await message.member.voice.channel.join()).play(s)})
         }
-    } catch (error) {
+    }
+    catch (error) {
         console.error(error)
     }
-});
+})
 
-client.login(process.env.TOKEN);
+client.login(process.env.TOKEN)

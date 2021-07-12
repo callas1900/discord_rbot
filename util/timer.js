@@ -7,10 +7,11 @@ function clear(id) {
     }
 }
 const TIMERS = new Map()
-module.exports = function(timers, id, task, voice=null) {
+module.exports = function(timers, id, task, voice = null) {
     if (timers.length === 0) {
         clear(id)
-    } else {
+    }
+    else {
         if (!TIMERS.get(id)) {
             TIMERS.set(id, [])
         }
@@ -21,12 +22,13 @@ module.exports = function(timers, id, task, voice=null) {
                     task(timer.message)
                     if (voice) { voice(timer.sound) }
                 }
-            } else {
+            }
+            else {
                 order = () => { task(timer.message) }
             }
-            let t = setTimeout(order, timer.time*60*1000)
+            const t = setTimeout(order, timer.time * 60 * 1000)
             TIMERS.get(id).push(t)
-        });
+        })
     }
 }
 module.exports.list = () => { return TIMERS }

@@ -1,25 +1,25 @@
 const test = require('ava')
-const Discord = require('discord.js');
+const Discord = require('discord.js')
 const mob = require('./module/mob.js')
 
-function createMessageChain(message, text, names=[]){
+function createMessageChain(message, text, names = []) {
     return createMessage(text, names, message.member.voice.channel.id)
 }
 
-function createMessage(text, names=[], id=Discord.SnowflakeUtil.generate()){
+function createMessage(text, names = [], id = Discord.SnowflakeUtil.generate()) {
     const members = new Map()
     names.forEach((name)=> {
         members.set(Discord.SnowflakeUtil.generate(), createMember(name))
     })
-    return { content:text, member: { voice: { channel: { 
+    return { content:text, member: { voice: { channel: {
         id: id,
-        members: members, 
-        join: (()=>{ return {play: (file) => {console.log(file)}}})
-    }}}}
+        members: members,
+        join: (()=>{ return { play: (file) => { console.log(file) } } }),
+    } } } }
 }
 
-function createMember(name, id=Discord.SnowflakeUtil.generate()){
-    return { user:{id: id, username: name} }
+function createMember(name, id = Discord.SnowflakeUtil.generate()) {
+    return { user:{ id: id, username: name } }
 }
 
 test('ping pong', t => {
@@ -47,18 +47,18 @@ test('syuzo stop', t => {
 })
 
 test('mob help', async t => {
-    let message = createMessage('!mob help')
+    const message = createMessage('!mob help')
     const exp = ':robot: まず `ready` を使ってね。`start`で開始だよ。後はずっと`start`を使ってね。\n途中でとめたきゃ`cancel`'
     t.is((await mob.exec(message)).msg, exp)
 })
 
 test('mob ready (not joining voice chat)', async t => {
-    let message = { content:'!mob ready', member: { voice: {channel: null}}}
+    const message = { content:'!mob ready', member: { voice: { channel: null } } }
     t.is((await mob.exec(message)).msg, ':robot: voice チャンネルにjoinしてください')
 })
 
 test('mob ready (user is alone)', async t => {
-    let message = createMessage('!mob ready', ['aaa'])
+    const message = createMessage('!mob ready', ['aaa'])
     t.is((await mob.exec(message)).msg, ':robot: ぼっちなのでモブ出来ません')
 })
 
@@ -88,12 +88,12 @@ test('mob start', async t => {
     t.is(ret.timers.length, 2)
     t.like(ret.timers[0], {
         time: 5,
-        sound: './assets/horn.mp3'
+        sound: './assets/horn.mp3',
     })
     t.regex(ret.timers[0].message, /:robot: 5分たちました! <@[0-9].+> <@[0-9].+> <@[0-9].+> \n:robot: 次の driver は ... ,navigator は .../)
     t.like(ret.timers[1], {
         time: 4,
-        sound: undefined
+        sound: undefined,
     })
     t.is(ret.timers[1].message, ':robot: 後1分！！！！！！')
     // continue
@@ -112,12 +112,12 @@ test('mob start with number', async t => {
     t.is(ret.timers.length, 2)
     t.like(ret.timers[0], {
         time: 4,
-        sound: './assets/horn.mp3'
+        sound: './assets/horn.mp3',
     })
     t.regex(ret.timers[0].message, /:robot: 4分たちました! <@[0-9].+> <@[0-9].+> <@[0-9].+> \n:robot: 次の driver は ... ,navigator は .../)
     t.like(ret.timers[1], {
         time: 3,
-        sound: undefined
+        sound: undefined,
     })
     t.is(ret.timers[1].message, ':robot: 後1分！！！！！！')
     const message3 = createMessageChain(message, '!mob start 2')
@@ -153,8 +153,10 @@ test('factory', t => {
 
 test('timer util', t => {
     const timerutil = require('./util/timer.js')
-    const task = () => {}
-    const timer1 = { message: 'test-message' , time: 0 }
+    const task = () => {
+        // dummy function
+    }
+    const timer1 = { message: 'test-message', time: 0 }
     // id check
     timerutil([timer1], '1', task)
     t.is(timerutil.list().size, 1)
@@ -168,7 +170,7 @@ test('timer util', t => {
     t.is(timerutil.list().size, 3)
     // timer list check
     t.is(timerutil.list().get('1').length, 2)
-    // clear id-1's list 
+    // clear id-1's list
     timerutil([], '1', task)
     t.is(timerutil.list().get('1').length, 0)
     t.is(timerutil.list().get('2').length, 2)
@@ -177,9 +179,11 @@ test('timer util', t => {
 
 test('timer util with sound', t => {
     const timerutil = require('./util/timer.js')
-    const task = () => {}
+    const task = () => {
+        // dummy function
+    }
     const voice = (s) => {t.is(s, '')}
-    const timer = { message: 'test-message' , time: 0, sound: 'test-sound' }
+    const timer = { message: 'test-message', time: 0, sound: 'test-sound' }
     timerutil([timer], '1', task)
     t.is(timerutil.list().get('1').length, 1)
     timerutil([timer], '1', task, voice)
