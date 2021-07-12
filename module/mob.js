@@ -45,27 +45,24 @@ module.exports.exec = async function(message) {
             msg += 'voice チャンネルにjoinしてください'
             break
         }
-        if (!DEBUG && message.member.voice.channel.members.size < 2) {
-            msg += 'ぼっちなのでモブ出来ません'
-            break
-        }
         init(message)
         const members = []
         message.member.voice.channel.members.forEach((member) => {
-            members.push({ 'id': member.user.id, 'name': member.user.username })
+            if (member.user.username != 'rbot') {
+                members.push({ 'id': member.user.id, 'name': member.user.username })
+            }
         })
+        if (!DEBUG && members.length < 2) {
+            msg += 'ぼっちなのでモブ出来ません'
+            break
+        }
         msg += 'メンバーは '
-        timers = []
         members.forEach(member => {
-            if (member.name != 'rbot') { msg += member.name + ' ' }
+            msg += member.name + ' '
         })
+        timers = []
+        timers.push({ time: 0, sound: './assets/ada_morning.mp3' })
         setMEMBERS(message, members)
-        try {
-            (await message.member.voice.channel.join()).play('./assets/car.mp3')
-        }
-        catch (error) {
-            console.error(error)
-        }
         break
     }
     case 'start': {
@@ -99,7 +96,7 @@ module.exports.exec = async function(message) {
         timer_msg += `\n:robot: 次の driver は ${members[0].name} ,navigator は ${members[(DEBUG) ? 0 : 1].name}`
         // set timer
         timers = []
-        timers.push({ message: timer_msg, time: time, sound: './assets/horn.mp3' })
+        timers.push({ message: timer_msg, time: time, sound: './assets/ada_well_done.mp3' })
         timers.push({ message: ':robot: 後1分！！！！！！', time: time - 1 })
         setMEMBERS(message, members)
         break
@@ -111,9 +108,12 @@ module.exports.exec = async function(message) {
     }
     case 'debug': {
         msg += '\nMEMBERS:\n'
-        msg += MEMBERS
+        MEMBERS.forEach((v, k) => {
+            msg += `[${k}] = `
+            v.forEach((user) => { msg += `[${user.id} : ${user.name}],` })
+        })
         msg += '\nINIT:\n'
-        msg += INIT
+        INIT.forEach((v, k) => { msg += (`[${k}] = %o`, v) })
         msg += '\nDEBUG:\n'
         msg += DEBUG
         if (commands[2]) {

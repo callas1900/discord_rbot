@@ -19,7 +19,7 @@ module.exports = function(timers, id, task, voice = null) {
             let order
             if (timer.sound) {
                 order = () => {
-                    task(timer.message)
+                    if (timer.message) { task(timer.message) }
                     if (voice) { voice(timer.sound) }
                 }
             }

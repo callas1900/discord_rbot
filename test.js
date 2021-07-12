@@ -70,25 +70,28 @@ test('mob start initialization', async t => {
 })
 
 test('mob ready', async t => {
-    let message = createMessage('!mob ready', ['aaa', 'bbb', 'ccc'])
-    t.is((await mob.exec(message)).msg, ':robot: メンバーは aaa bbb ccc ')
-    message = createMessageChain(message, '!mob start')
+    const message = createMessage('!mob ready', ['aaa', 'bbb', 'ccc'])
     const ret = await mob.exec(message)
-    t.regex(ret.msg, /:robot: シャッフルしまーす\n... ... ... \ndriver => ..., navigator => .../)
+    t.is(ret.msg, ':robot: メンバーは aaa bbb ccc ')
+    t.is(ret.timers.length, 1)
+    t.like(ret.timers[0], {
+        time: 0,
+        sound: './assets/ada_morning.mp3',
+    })
 })
 
 test('mob start', async t => {
     // ready
     let message = createMessage('!mob ready', ['aaa', 'bbb', 'ccc'])
-    t.is((await mob.exec(message)).msg, ':robot: メンバーは aaa bbb ccc ')
+    let ret = await mob.exec(message)
     // start
     message = createMessageChain(message, '!mob start')
-    const ret = await mob.exec(message)
+    ret = await mob.exec(message)
     t.regex(ret.msg, /:robot: シャッフルしまーす\n... ... ... \ndriver => ..., navigator => .../)
     t.is(ret.timers.length, 2)
     t.like(ret.timers[0], {
         time: 5,
-        sound: './assets/horn.mp3',
+        sound: './assets/ada_well_done.mp3',
     })
     t.regex(ret.timers[0].message, /:robot: 5分たちました! <@[0-9].+> <@[0-9].+> <@[0-9].+> \n:robot: 次の driver は ... ,navigator は .../)
     t.like(ret.timers[1], {
@@ -112,7 +115,7 @@ test('mob start with number', async t => {
     t.is(ret.timers.length, 2)
     t.like(ret.timers[0], {
         time: 4,
-        sound: './assets/horn.mp3',
+        sound: './assets/ada_well_done.mp3',
     })
     t.regex(ret.timers[0].message, /:robot: 4分たちました! <@[0-9].+> <@[0-9].+> <@[0-9].+> \n:robot: 次の driver は ... ,navigator は .../)
     t.like(ret.timers[1], {
