@@ -102,7 +102,9 @@ module.exports.exec = async function(message) {
         break
     }
     case 'cancel': {
+        const members = getMEMBERS(message)
         msg += 'はいよ！'
+        msg += `\n次の driver は ${members[0].name} ,navigator は ${members[(DEBUG) ? 0 : 1].name}`
         timers = []
         break
     }
@@ -111,7 +113,7 @@ module.exports.exec = async function(message) {
         MEMBERS.forEach((v, k) => {
             msg += `{ [${k}] = `
             v.forEach((user) => { msg += `[${user.id} : ${user.name}],` })
-            msg += ` }`
+            msg += ' }'
         })
         msg += '\nINIT:\n'
         INIT.forEach((v, k) => { msg += (`[${k}] = %o`, v) })
@@ -137,7 +139,8 @@ module.exports.exec = async function(message) {
     default: {
         msg += 'まず `ready` を使ってね。`start`で開始だよ。後はずっと`start`を使ってね。\n途中でとめたきゃ`cancel`'
         break
-    } }
+    }
+    }
     return { msg: msg, timers: timers }
 }
 

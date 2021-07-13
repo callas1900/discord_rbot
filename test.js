@@ -138,6 +138,20 @@ test('mob start with number', async t => {
     t.is((await mob.exec(message7)).msg, ':robot: 入力値は2以上、30以下です。')
 })
 
+test('mob cancel', async t => {
+    // ready
+    let message = createMessage('!mob ready', ['aaa', 'bbb', 'ccc'])
+    t.is((await mob.exec(message)).timers.length, 1)
+    // start
+    message = createMessageChain(message, '!mob start')
+    t.is((await mob.exec(message)).timers[0].time, 5 * 60)
+    // cancel
+    message = createMessageChain(message, '!mob cancel')
+    const ret = await mob.exec(message)
+    t.regex(ret.msg, /:robot: はいよ！\n次の driver は ... ,navigator は .../)
+    t.is(ret.timers.length, 0)
+})
+
 test('factory no command', t => {
     const factory = require('./module/factory.js')
     const message = createMessage('ping')
