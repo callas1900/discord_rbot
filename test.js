@@ -37,7 +37,7 @@ test('syuzo', t => {
     t.is(ret.msg, undefined)
     t.is(ret.timers.length, says.length)
     t.is(ret.timers[0].time, 0)
-    t.is(ret.timers[1].time, 60)
+    t.is(ret.timers[1].time, 60 * 60)
 })
 test('syuzo stop', t => {
     const message = createMessage('!syuzo stop')
@@ -90,12 +90,12 @@ test('mob start', async t => {
     t.regex(ret.msg, /:robot: シャッフルしまーす\n... ... ... \ndriver => ..., navigator => .../)
     t.is(ret.timers.length, 2)
     t.like(ret.timers[0], {
-        time: 5,
+        time: 5 * 60,
         sound: './assets/ada_well_done.mp3',
     })
     t.regex(ret.timers[0].message, /:robot: 5分たちました! <@[0-9].+> <@[0-9].+> <@[0-9].+> \n:robot: 次の driver は ... ,navigator は .../)
     t.like(ret.timers[1], {
-        time: 4,
+        time: 4 * 60,
         sound: undefined,
     })
     t.is(ret.timers[1].message, ':robot: 後1分！！！！！！')
@@ -114,22 +114,22 @@ test('mob start with number', async t => {
     const ret = await mob.exec(message2)
     t.is(ret.timers.length, 2)
     t.like(ret.timers[0], {
-        time: 4,
+        time: 240,
         sound: './assets/ada_well_done.mp3',
     })
     t.regex(ret.timers[0].message, /:robot: 4分たちました! <@[0-9].+> <@[0-9].+> <@[0-9].+> \n:robot: 次の driver は ... ,navigator は .../)
     t.like(ret.timers[1], {
-        time: 3,
+        time: 180,
         sound: undefined,
     })
     t.is(ret.timers[1].message, ':robot: 後1分！！！！！！')
     const message3 = createMessageChain(message, '!mob start 2')
-    t.is((await mob.exec(message3)).timers[0].time, 2)
+    t.is((await mob.exec(message3)).timers[0].time, 2 * 60)
     const message4 = createMessageChain(message, '!mob start 1')
     t.is((await mob.exec(message4)).timers, undefined)
     t.is((await mob.exec(message4)).msg, ':robot: 入力値は2以上、30以下です。')
     const message5 = createMessageChain(message, '!mob start 30')
-    t.is((await mob.exec(message5)).timers[0].time, 30)
+    t.is((await mob.exec(message5)).timers[0].time, 30 * 60)
     const message6 = createMessageChain(message, '!mob start 31')
     t.is((await mob.exec(message6)).timers, undefined)
     t.is((await mob.exec(message6)).msg, ':robot: 入力値は2以上、30以下です。')

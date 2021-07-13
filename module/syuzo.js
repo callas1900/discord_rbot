@@ -22,7 +22,7 @@ module.exports.exec = function(message) {
     const args = shuffleArray(says)
     args.forEach(say => {
         const msg = `松岡修造「${say}」`
-        timers.push({ message: msg, time: count * 60 })
+        timers.push({ message: msg, time: count * 60 * 60 })
         count += 1
     })
     return { timers: timers }

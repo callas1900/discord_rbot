@@ -96,8 +96,8 @@ module.exports.exec = async function(message) {
         timer_msg += `\n:robot: 次の driver は ${members[0].name} ,navigator は ${members[(DEBUG) ? 0 : 1].name}`
         // set timer
         timers = []
-        timers.push({ message: timer_msg, time: time, sound: './assets/ada_well_done.mp3' })
-        timers.push({ message: ':robot: 後1分！！！！！！', time: time - 1 })
+        timers.push({ message: timer_msg, time: time * 60, sound: './assets/ada_well_done.mp3' })
+        timers.push({ message: ':robot: 後1分！！！！！！', time: (time - 1) * 60 })
         setMEMBERS(message, members)
         break
     }
@@ -109,8 +109,9 @@ module.exports.exec = async function(message) {
     case 'debug': {
         msg += '\nMEMBERS:\n'
         MEMBERS.forEach((v, k) => {
-            msg += `[${k}] = `
+            msg += `{ [${k}] = `
             v.forEach((user) => { msg += `[${user.id} : ${user.name}],` })
+            msg += ` }`
         })
         msg += '\nINIT:\n'
         INIT.forEach((v, k) => { msg += (`[${k}] = %o`, v) })
@@ -123,11 +124,20 @@ module.exports.exec = async function(message) {
         }
         break
     }
+    case 'fire': {
+        timers = []
+        timers.push({ message: ':robot: ベクターキャノンモードヘ移行', time: 0, sound: './assets/ada_vector_canon.mp3' })
+        timers.push({ message: ':robot: エネルギーライン、全段直結', time: 5 })
+        timers.push({ message: ':robot: ランディングギア、アイゼン、ロック', time: 8 })
+        timers.push({ message: ':robot: チャンバー内、正常加圧中', time: 11 })
+        timers.push({ message: ':robot: ライフリング回転開始', time: 14 })
+        timers.push({ message: ':robot: 撃てます', time: 16 })
+        break
+    }
     default: {
         msg += 'まず `ready` を使ってね。`start`で開始だよ。後はずっと`start`を使ってね。\n途中でとめたきゃ`cancel`'
         break
-    }
-    }
+    } }
     return { msg: msg, timers: timers }
 }
 

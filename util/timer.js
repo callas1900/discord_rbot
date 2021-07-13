@@ -26,7 +26,7 @@ module.exports = function(timers, id, task, voice = null) {
             else {
                 order = () => { task(timer.message) }
             }
-            const t = setTimeout(order, timer.time * 60 * 1000)
+            const t = setTimeout(order, timer.time * 1000)
             TIMERS.get(id).push(t)
         })
     }
