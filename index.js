@@ -5,6 +5,7 @@ const dotenv = require('dotenv')
 dotenv.config()
 const factory = require('./module/factory.js')
 const timerutil = require('./util/timer.js')
+const taskutil = require('./util/task.js')
 const watcher = require('./module/watch_vc_state.js')
 
 client.once('ready', () => { console.log('Ready!') })
@@ -16,9 +17,7 @@ client.on('message', async message => {
         const ret = await cmd.exec(message)
         if (ret.msg) { message.channel.send(ret.msg) }
         if (ret.timers) {
-            timerutil(ret.timers, cmd.id,
-                (m) => { message.channel.send(m) },
-                async (s) => { (await message.member.voice.channel.join()).play(s)})
+            timerutil(ret.timers, cmd.id, taskutil(message))
         }
     }
     catch (error) {
@@ -28,5 +27,4 @@ client.on('message', async message => {
 client.on('voiceStateUpdate', (_oldState, _state) => {
     watcher.exec(client)
 })
-
 client.login(process.env.TOKEN)

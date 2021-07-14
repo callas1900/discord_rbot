@@ -7,7 +7,7 @@ function clear(id) {
     }
 }
 const TIMERS = new Map()
-module.exports = function(timers, id, task, voice = null) {
+module.exports = function(timers, id, tasks) {
     if (timers.length === 0) {
         clear(id)
     }
@@ -16,15 +16,12 @@ module.exports = function(timers, id, task, voice = null) {
             TIMERS.set(id, [])
         }
         timers.forEach((timer) => {
-            let order
-            if (timer.sound) {
-                order = () => {
-                    if (timer.message) { task(timer.message) }
-                    if (voice) { voice(timer.sound) }
-                }
-            }
-            else {
-                order = () => { task(timer.message) }
+            const order = () => {
+                tasks.forEach((fn, arg) => {
+                    if (Reflect.has(timer, arg)) {
+                        fn(Reflect.get(timer, arg))
+                    }
+                })
             }
             const t = setTimeout(order, timer.time * 1000)
             TIMERS.get(id).push(t)

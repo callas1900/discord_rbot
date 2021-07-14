@@ -170,9 +170,14 @@ test('factory', t => {
 
 test('timer util', t => {
     const timerutil = require('./util/timer.js')
-    const task = () => {
-        // dummy function
-    }
+    const task = [
+        () => {
+            // dummy function
+        },
+        () => {
+            // dummy function
+        },
+    ]
     const timer1 = { message: 'test-message', time: 0 }
     // id check
     timerutil([timer1], '1', task)
@@ -196,9 +201,14 @@ test('timer util', t => {
 
 test('timer util with sound', t => {
     const timerutil = require('./util/timer.js')
-    const task = () => {
-        // dummy function
-    }
+    const task = [
+        () => {
+            // dummy function
+        },
+        () => {
+            // dummy function
+        },
+    ]
     const voice = (s) => {t.is(s, '')}
     const timer = { message: 'test-message', time: 0, sound: 'test-sound' }
     timerutil([timer], '1', task)
