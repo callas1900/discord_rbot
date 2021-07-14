@@ -98,6 +98,7 @@ module.exports.exec = async function(message) {
         timers = []
         timers.push({ message: timer_msg, time: time * 60, sound: './assets/ada_well_done.mp3' })
         timers.push({ message: ':robot: 後1分！！！！！！', time: (time - 1) * 60 })
+        timers.push({ progress: '*'.repeat(time * 6), time: 0 })
         setMEMBERS(message, members)
         break
     }

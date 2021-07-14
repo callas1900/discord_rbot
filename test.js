@@ -88,7 +88,7 @@ test('mob start', async t => {
     message = createMessageChain(message, '!mob start')
     ret = await mob.exec(message)
     t.regex(ret.msg, /:robot: シャッフルしまーす\n... ... ... \ndriver => ..., navigator => .../)
-    t.is(ret.timers.length, 2)
+    t.is(ret.timers.length, 3)
     t.like(ret.timers[0], {
         time: 5 * 60,
         sound: './assets/ada_well_done.mp3',
@@ -99,6 +99,7 @@ test('mob start', async t => {
         sound: undefined,
     })
     t.is(ret.timers[1].message, ':robot: 後1分！！！！！！')
+    t.is(ret.timers[2].progress, '*'.repeat(5 * 6))
     // continue
     t.is((await mob.exec(message)).msg, ':robot: はじまるよー！')
     t.is((await mob.exec(message)).msg, ':robot: はじまるよー！')
@@ -112,7 +113,7 @@ test('mob start with number', async t => {
     // start
     const message2 = createMessageChain(message, '!mob start 4')
     const ret = await mob.exec(message2)
-    t.is(ret.timers.length, 2)
+    t.is(ret.timers.length, 3)
     t.like(ret.timers[0], {
         time: 240,
         sound: './assets/ada_well_done.mp3',
@@ -123,6 +124,7 @@ test('mob start with number', async t => {
         sound: undefined,
     })
     t.is(ret.timers[1].message, ':robot: 後1分！！！！！！')
+    t.is(ret.timers[2].progress, '*'.repeat(4 * 6))
     const message3 = createMessageChain(message, '!mob start 2')
     t.is((await mob.exec(message3)).timers[0].time, 2 * 60)
     const message4 = createMessageChain(message, '!mob start 1')
