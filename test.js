@@ -206,3 +206,35 @@ test('timer util with sound', t => {
     timerutil([timer], '1', task, voice)
     t.is(timerutil.list().get('1').length, 2)
 })
+
+function setupClient(checker, isConnection, memberNumber) {
+    const botId = Discord.SnowflakeUtil.generate()
+    const members = new Map().set(botId, '')
+    for (let i = 0; i < memberNumber; i++) {
+        members.set(Discord.SnowflakeUtil.generate(), '')
+    }
+    const connections = new Map()
+    if (isConnection) {
+        connections.set(Discord.SnowflakeUtil.generate(), { channel: { members: members, leave: checker } })
+    }
+    return { user: { id: botId }, voice: { connections: connections } }
+}
+
+test('auto leving from vc when bot becomes alone', t => {
+    const watcher = require('./module/watch_vc_state.js')
+    let calledFnLeave = false
+    const checker = () => { calledFnLeave = true }
+    const client = setupClient(checker, true, 0)
+    watcher.exec(client)
+    t.truthy(calledFnLeave)
+    // error cases: no connections
+    const clientNoConnections = setupClient(checker, false, 5)
+    calledFnLeave = false
+    watcher.exec(clientNoConnections)
+    t.falsy(calledFnLeave)
+    // error cases: not alone
+    const clientWithOtherMember = setupClient(checker, true, 1)
+    calledFnLeave = false
+    watcher.exec(clientWithOtherMember)
+    t.falsy(calledFnLeave)
+})
