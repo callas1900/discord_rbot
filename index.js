@@ -5,6 +5,7 @@ const dotenv = require('dotenv')
 dotenv.config()
 const factory = require('./module/factory.js')
 const timerutil = require('./util/timer.js')
+const watcher = require('./module/watch_vc_state.js')
 
 client.once('ready', () => { console.log('Ready!') })
 client.on('message', async message => {
@@ -23,6 +24,9 @@ client.on('message', async message => {
     catch (error) {
         console.error(error)
     }
+})
+client.on('voiceStateUpdate', (_oldState, _state) => {
+    watcher.exec(client)
 })
 
 client.login(process.env.TOKEN)
