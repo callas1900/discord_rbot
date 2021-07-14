@@ -110,13 +110,13 @@ module.exports.exec = async function(message) {
     }
     case 'debug': {
         msg += '\nMEMBERS:\n'
-        MEMBERS.forEach((v, k) => {
-            msg += `{ [${k}] = `
+        MEMBERS.forEach((v, k, m) => {
+            msg += `{ ${k} => `
             v.forEach((user) => { msg += `[${user.id} : ${user.name}],` })
-            msg += ' }'
+            msg += ' }\n'
         })
         msg += '\nINIT:\n'
-        INIT.forEach((v, k) => { msg += (`[${k}] = %o`, v) })
+        INIT.forEach((v, k, m) => { msg += (`${k} => ${v},\n`) })
         msg += '\nDEBUG:\n'
         msg += DEBUG
         if (commands[2]) {
