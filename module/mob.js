@@ -33,6 +33,10 @@ function init(message) {
     setINIT(message)
 }
 
+function getOrderText(members) {
+    return `\n${'-'.repeat(20)}\n:red_car: driver        => [${members[0].name}]\n:map: navigator => [${members[(DEBUG) ? 0 : 1].name}]\n${'-'.repeat(20)}`
+}
+
 module.exports.getMembers = () => { return MEMBERS }
 
 module.exports.exec = async function(message) {
@@ -78,9 +82,10 @@ module.exports.exec = async function(message) {
         }
         if (getINIT(message)) {
             members = shuffle(members)
-            msg += 'シャッフルしまーす\n'
-            members.forEach(member => {msg += member.name + ' '})
-            msg += (`\ndriver => ${members[0].name}, navigator => ${members[(DEBUG) ? 0 : 1].name}`)
+            msg += 'シャッフルしまーす => [ '
+            members.forEach(member => {msg += member.name + ', '})
+            msg += ' ]\n'
+            msg += getOrderText(members)
             setINIT(message, false)
         }
         else {
@@ -93,7 +98,7 @@ module.exports.exec = async function(message) {
         // setup for next
         const preDriver = members.shift()
         members.push(preDriver)
-        timer_msg += `\n:robot: 次の driver は ${members[0].name} ,navigator は ${members[(DEBUG) ? 0 : 1].name}`
+        timer_msg += (`\n:robot: ${getOrderText(members)}`)
         // set timer
         timers = []
         timers.push({ message: timer_msg, time: time * 60, sound: './assets/ada_well_done.mp3' })
@@ -105,7 +110,7 @@ module.exports.exec = async function(message) {
     case 'cancel': {
         const members = getMEMBERS(message)
         msg += 'はいよ！'
-        msg += `\n次の driver は ${members[0].name} ,navigator は ${members[(DEBUG) ? 0 : 1].name}`
+        msg += getOrderText(members)
         timers = []
         break
     }

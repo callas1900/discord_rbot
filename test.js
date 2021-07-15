@@ -22,6 +22,13 @@ function createMember(name, id = Discord.SnowflakeUtil.generate()) {
     return { user:{ id: id, username: name } }
 }
 
+function checkOrderList(t, lines) {
+    t.is(lines[0], '-'.repeat(20))
+    t.regex(lines[1], /:red_car:[ ]driver[ ]{8}=>[ ]\[...\]/)
+    t.regex(lines[2], /:map:[ ]navigator[ ]=>[ ]\[...\]/)
+    t.is(lines[3], '-'.repeat(20))
+}
+
 test('ping pong', t => {
     const ping = require('./module/ping.js')
     const message = createMessage('!ping')
@@ -87,13 +94,19 @@ test('mob start', async t => {
     // start
     message = createMessageChain(message, '!mob start')
     ret = await mob.exec(message)
-    t.regex(ret.msg, /:robot: シャッフルしまーす\n... ... ... \ndriver => ..., navigator => .../)
+    let splited = ret.msg.split('\n')
+    t.regex(splited[0], /:robot: シャッフルしまーす => \[[ ]...,[ ]...,[ ]...,[ ]{2}\]/)
+    t.is(splited[1], '')
+    checkOrderList(t, splited.slice(2, 6))
     t.is(ret.timers.length, 3)
     t.like(ret.timers[0], {
         time: 5 * 60,
         sound: './assets/ada_well_done.mp3',
     })
-    t.regex(ret.timers[0].message, /:robot: 5分たちました! <@[0-9].+> <@[0-9].+> <@[0-9].+> \n:robot: 次の driver は ... ,navigator は .../)
+    splited = ret.timers[0].message.split('\n')
+    t.regex(splited[0], /:robot: 5分たちました! <@[0-9].+> <@[0-9].+> <@[0-9].+>/)
+    t.regex(splited[1], /:robot: /)
+    checkOrderList(t, splited.slice(2, 6))
     t.like(ret.timers[1], {
         time: 4 * 60,
         sound: undefined,
@@ -118,7 +131,10 @@ test('mob start with number', async t => {
         time: 240,
         sound: './assets/ada_well_done.mp3',
     })
-    t.regex(ret.timers[0].message, /:robot: 4分たちました! <@[0-9].+> <@[0-9].+> <@[0-9].+> \n:robot: 次の driver は ... ,navigator は .../)
+    const splited = ret.timers[0].message.split('\n')
+    t.regex(splited[0], /:robot: 4分たちました! <@[0-9].+> <@[0-9].+> <@[0-9].+>/)
+    t.is(splited[1], ':robot: ')
+    checkOrderList(t, splited.slice(2, 6))
     t.like(ret.timers[1], {
         time: 180,
         sound: undefined,
@@ -150,7 +166,9 @@ test('mob cancel', async t => {
     // cancel
     message = createMessageChain(message, '!mob cancel')
     const ret = await mob.exec(message)
-    t.regex(ret.msg, /:robot: はいよ！\n次の driver は ... ,navigator は .../)
+    const splited = ret.msg.split('\n')
+    t.is(splited[0], ':robot: はいよ！')
+    checkOrderList(t, splited.slice(1, 5))
     t.is(ret.timers.length, 0)
 })
 
