@@ -1,3 +1,4 @@
+const buttonutil = require('../util/button.js')
 const MEMBERS = new Map()
 const INIT = new Map()
 let DEBUG = false
@@ -99,9 +100,10 @@ module.exports.exec = async function(message) {
         const preDriver = members.shift()
         members.push(preDriver)
         timer_msg += (`\n:robot: ${getOrderText(members)}`)
+        const btn = buttonutil.buttons.get('mob-start')
         // set timer
         timers = []
-        timers.push({ message: timer_msg, time: time * 60, sound: './assets/ada_well_done.mp3' })
+        timers.push({ message: [ timer_msg, btn ], time: time * 60, sound: './assets/ada_well_done.mp3' })
         timers.push({ message: ':robot: 後1分！！！！！！', time: (time - 1) * 60 })
         timers.push({ progress: '*'.repeat(time * 6), time: 0 })
         setMEMBERS(message, members)

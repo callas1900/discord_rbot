@@ -3,7 +3,14 @@ const posi = ':green_circle:'
 const nega = ':black_circle:'
 const prefix = 'progress:'
 module.exports = function(message) {
-    _tasks.set('message', (m) => { message.channel.send(m) })
+    _tasks.set('message', (m) => {
+        if (Array.isArray(m)) {
+            message.channel.send(m[0], m[1])
+        }
+        else {
+            message.channel.send(m)
+        }
+    })
     _tasks.set('sound', async (s) => { (await message.member.voice.channel.join()).play(s)})
     _tasks.set('progress', async (m) => {
         const scale = m.length
