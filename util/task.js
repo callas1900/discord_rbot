@@ -10,7 +10,7 @@ module.exports = function(message) {
         const botmessage = await message.channel.send(prefix + posi.repeat(scale))
         let cursol = scale - 1
         const interval = setInterval(() => {
-            if (scale > 1) {
+            if (cursol >= 0) {
                 botmessage.edit(`${prefix} ${posi.repeat(cursol)}${nega.repeat(scale - cursol)}`)
                 --cursol
             }
