@@ -94,10 +94,11 @@ test('mob start', async t => {
     // start
     message = createMessageChain(message, '!mob start')
     ret = await mob.exec(message)
-    let splited = ret.msg.split('\n')
+    let splited = ret.msg[0].split('\n')
     t.regex(splited[0], /:robot: シャッフルしまーす => \[[ ]...,[ ]...,[ ]...,[ ]{2}\]/)
     t.is(splited[1], '')
     checkOrderList(t, splited.slice(2, 6))
+    t.is(ret.msg[1].custom_id, 'mob-cancel')
     t.is(ret.timers.length, 3)
     t.like(ret.timers[0], {
         time: 5 * 60,
@@ -115,9 +116,9 @@ test('mob start', async t => {
     t.is(ret.timers[1].message, ':robot: 後1分！！！！！！')
     t.is(ret.timers[2].progress, '*'.repeat(5 * 6))
     // continue
-    t.is((await mob.exec(message)).msg, ':robot: はじまるよー！')
-    t.is((await mob.exec(message)).msg, ':robot: はじまるよー！')
-    t.is((await mob.exec(message)).msg, ':robot: はじまるよー！')
+    t.is((await mob.exec(message)).msg[0], ':robot: はじまるよー！')
+    t.is((await mob.exec(message)).msg[0], ':robot: はじまるよー！')
+    t.is((await mob.exec(message)).msg[0], ':robot: はじまるよー！')
 })
 
 test('mob start with number', async t => {

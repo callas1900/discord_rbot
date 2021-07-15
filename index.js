@@ -17,7 +17,7 @@ client.on('message', async message => {
     if (!cmd) { return }
     try {
         const ret = await cmd.exec(message)
-        if (ret.msg) { message.channel.send(ret.msg) }
+        if (ret.msg) { message.channel.send(!Array.isArray(ret.msg) ? ret.msg : ret.msg[0], ret.msg[1]) }
         if (ret.timers) { timerutil(ret.timers, cmd.id, taskutil(message)) }
     }
     catch (error) {
