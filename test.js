@@ -56,30 +56,30 @@ test('syuzo stop', t => {
 test('mob help', async t => {
     const message = createMessage('!mob help')
     const exp = ':robot: まず `ready` を使ってね。`start`で開始だよ。後はずっと`start`を使ってね。\n途中でとめたきゃ`cancel`'
-    t.is((await mob.exec(message)).msg, exp)
+    t.like((await mob.exec(message)).msg, { message: exp, component: null })
 })
 
 test('mob ready (not joining voice chat)', async t => {
     const message = { content:'!mob ready', member: { voice: { channel: null } } }
-    t.is((await mob.exec(message)).msg, ':robot: voice チャンネルにjoinしてください')
+    t.like((await mob.exec(message)).msg, { message: ':robot: voice チャンネルにjoinしてください', component: null })
 })
 
 test('mob ready (user is alone)', async t => {
     const message = createMessage('!mob ready', ['aaa'])
-    t.is((await mob.exec(message)).msg, ':robot: ぼっちなのでモブ出来ません')
+    t.like((await mob.exec(message)).msg, { message: ':robot: ぼっちなのでモブ出来ません', component: null })
 })
 
 test('mob start initialization', async t => {
     const message = createMessage('!mob start')
     const ret = await mob.exec(message)
-    t.is(ret.msg, ':robot: `!mob ready` を先に実行してください')
+    t.like(ret.msg, { message: ':robot: `!mob ready` を先に実行してください', component: null })
     t.is(ret.timers, undefined)
 })
 
 test('mob ready', async t => {
     const message = createMessage('!mob ready', ['aaa', 'bbb', 'ccc'])
     const ret = await mob.exec(message)
-    t.is(ret.msg, ':robot: メンバーは aaa bbb ccc ')
+    t.like(ret.msg, { message: ':robot: メンバーは aaa bbb ccc ', component: null })
     t.is(ret.timers.length, 1)
     t.like(ret.timers[0], {
         time: 0,
@@ -94,11 +94,11 @@ test('mob start', async t => {
     // start
     message = createMessageChain(message, '!mob start')
     ret = await mob.exec(message)
-    let splited = ret.msg[0].split('\n')
+    let splited = ret.msg.message.split('\n')
     t.regex(splited[0], /:robot: シャッフルしまーす => \[[ ]...,[ ]...,[ ]...,[ ]{2}\]/)
     t.is(splited[1], '')
     checkOrderList(t, splited.slice(2, 6))
-    t.is(ret.msg[1].custom_id, 'mob-cancel')
+    t.is(ret.msg.component.custom_id, 'mob-cancel')
     t.is(ret.timers.length, 3)
     t.like(ret.timers[0], {
         time: 5 * 60,
@@ -116,15 +116,15 @@ test('mob start', async t => {
     t.is(ret.timers[1].message, ':robot: 後1分！！！！！！')
     t.is(ret.timers[2].progress, '*'.repeat(5 * 6))
     // continue
-    t.is((await mob.exec(message)).msg[0], ':robot: はじまるよー！')
-    t.is((await mob.exec(message)).msg[0], ':robot: はじまるよー！')
-    t.is((await mob.exec(message)).msg[0], ':robot: はじまるよー！')
+    t.is((await mob.exec(message)).msg.message, ':robot: はじまるよー！')
+    t.is((await mob.exec(message)).msg.message, ':robot: はじまるよー！')
+    t.is((await mob.exec(message)).msg.message, ':robot: はじまるよー！')
 })
 
 test('mob start with number', async t => {
     // ready
     const message = createMessage('!mob ready', ['aaa', 'bbb', 'ccc'])
-    t.is((await mob.exec(message)).msg, ':robot: メンバーは aaa bbb ccc ')
+    t.like((await mob.exec(message)).msg, { message: ':robot: メンバーは aaa bbb ccc ', component: null })
     // start
     const message2 = createMessageChain(message, '!mob start 4')
     const ret = await mob.exec(message2)
@@ -148,15 +148,15 @@ test('mob start with number', async t => {
     t.is((await mob.exec(message3)).timers[0].time, 2 * 60)
     const message4 = createMessageChain(message, '!mob start 1')
     t.is((await mob.exec(message4)).timers, undefined)
-    t.is((await mob.exec(message4)).msg, ':robot: 入力値は2以上、30以下です。')
+    t.like((await mob.exec(message4)).msg, { message: ':robot: 入力値は2以上、30以下です。', component: null })
     const message5 = createMessageChain(message, '!mob start 30')
     t.is((await mob.exec(message5)).timers[0].time, 30 * 60)
     const message6 = createMessageChain(message, '!mob start 31')
     t.is((await mob.exec(message6)).timers, undefined)
-    t.is((await mob.exec(message6)).msg, ':robot: 入力値は2以上、30以下です。')
+    t.like((await mob.exec(message6)).msg, { message: ':robot: 入力値は2以上、30以下です。', component: null })
     const message7 = createMessageChain(message, '!mob start aaa')
     t.is((await mob.exec(message7)).timers, undefined)
-    t.is((await mob.exec(message7)).msg, ':robot: 入力値は2以上、30以下です。')
+    t.like((await mob.exec(message7)).msg, { message: ':robot: 入力値は2以上、30以下です。', component: null })
 })
 
 test('mob cancel', async t => {
@@ -169,7 +169,7 @@ test('mob cancel', async t => {
     // cancel
     message = createMessageChain(message, '!mob cancel')
     const ret = await mob.exec(message)
-    const splited = ret.msg.split('\n')
+    const splited = ret.msg.message.split('\n')
     t.is(splited[0], ':robot: はいよ！')
     checkOrderList(t, splited.slice(1, 5))
     t.is(ret.timers.length, 0)

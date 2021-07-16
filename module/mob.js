@@ -42,12 +42,12 @@ module.exports.getMembers = () => { return MEMBERS }
 
 module.exports.exec = async function(message) {
     const commands = message.content.split(' ')
-    let msg = ':robot: '
+    let msg = { message: ':robot: ', component: null }
     let timers
     switch(commands[1]) {
     case 'ready': {
         if (!message.member.voice.channel) {
-            msg += 'voice チャンネルにjoinしてください'
+            msg.message += 'voice チャンネルにjoinしてください'
             break
         }
         init(message)
@@ -58,12 +58,12 @@ module.exports.exec = async function(message) {
             }
         })
         if (!DEBUG && members.length < 2) {
-            msg += 'ぼっちなのでモブ出来ません'
+            msg.message += 'ぼっちなのでモブ出来ません'
             break
         }
-        msg += 'メンバーは '
+        msg.message += 'メンバーは '
         members.forEach(member => {
-            msg += member.name + ' '
+            msg.message += member.name + ' '
         })
         timers = []
         timers.push({ time: 0, sound: './assets/ada_morning.mp3' })
@@ -74,23 +74,23 @@ module.exports.exec = async function(message) {
         const time = commands[2] ? (isNaN(commands[2])) ? -99 : eval(commands[2]) : 5
         let members = getMEMBERS(message)
         if (time < 2 || time > 30) {
-            msg += '入力値は2以上、30以下です。'
+            msg.message += '入力値は2以上、30以下です。'
             break
         }
         if (!members || members.length === 0) {
-            msg += '`!mob ready` を先に実行してください'
+            msg.message += '`!mob ready` を先に実行してください'
             break
         }
         if (getINIT(message)) {
             members = shuffle(members)
-            msg += 'シャッフルしまーす => [ '
-            members.forEach(member => {msg += member.name + ', '})
-            msg += ' ]\n'
-            msg += getOrderText(members)
+            msg.message += 'シャッフルしまーす => [ '
+            members.forEach(member => {msg.message += member.name + ', '})
+            msg.message += ' ]\n'
+            msg.message += getOrderText(members)
             setINIT(message, false)
         }
         else {
-            msg += 'はじまるよー！'
+            msg.message += 'はじまるよー！'
         }
         let timer_msg = `:robot: ${time}分たちました! `
         members.forEach(member => {
@@ -108,31 +108,31 @@ module.exports.exec = async function(message) {
         timers.push({ progress: '*'.repeat(time * 6), time: 0 })
         setMEMBERS(message, members)
         const cancelBtn = buttonutil.buttons.get('mob-cancel')
-        msg = [msg, cancelBtn]
+        msg.component = cancelBtn
         break
     }
     case 'cancel': {
         const members = getMEMBERS(message)
-        msg += 'はいよ！'
-        msg += getOrderText(members)
+        msg.message += 'はいよ！'
+        msg.message += getOrderText(members)
         timers = []
         break
     }
     case 'debug': {
-        msg += '\nMEMBERS:\n'
+        msg.message += '\nMEMBERS:\n'
         MEMBERS.forEach((v, k) => {
-            msg += `{ ${k} => `
-            v.forEach((user) => { msg += `[${user.id} : ${user.name}],` })
-            msg += ' }\n'
+            msg.message += `{ ${k} => `
+            v.forEach((user) => { msg.message += `[${user.id} : ${user.name}],` })
+            msg.message += ' }\n'
         })
-        msg += '\nINIT:\n'
+        msg.message += '\nINIT:\n'
         INIT.forEach((v, k) => { msg += (`${k} => ${v},\n`) })
-        msg += '\nDEBUG:\n'
-        msg += DEBUG
+        msg.message += '\nDEBUG:\n'
+        msg.message += DEBUG
         if (commands[2]) {
             DEBUG = commands[2] === 'true'
-            msg += '\n!DEBUG: <= '
-            msg += DEBUG
+            msg.message += '\n!DEBUG: <= '
+            msg.message += DEBUG
         }
         break
     }
@@ -147,7 +147,7 @@ module.exports.exec = async function(message) {
         break
     }
     default: {
-        msg += 'まず `ready` を使ってね。`start`で開始だよ。後はずっと`start`を使ってね。\n途中でとめたきゃ`cancel`'
+        msg.message += 'まず `ready` を使ってね。`start`で開始だよ。後はずっと`start`を使ってね。\n途中でとめたきゃ`cancel`'
         break
     }
     }
