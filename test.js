@@ -104,16 +104,16 @@ test('mob start', async t => {
         time: 5 * 60,
         sound: './assets/ada_well_done.mp3',
     })
-    splited = ret.timers[0].message[0].split('\n')
+    splited = ret.timers[0].message.message.split('\n')
     t.regex(splited[0], /:robot: 5分たちました! <@[0-9].+> <@[0-9].+> <@[0-9].+>/)
     t.regex(splited[1], /:robot: /)
     checkOrderList(t, splited.slice(2, 6))
-    t.is(ret.timers[0].message[1].custom_id, 'mob-start')
+    t.is(ret.timers[0].message.component.custom_id, 'mob-start')
     t.like(ret.timers[1], {
         time: 4 * 60,
         sound: undefined,
     })
-    t.is(ret.timers[1].message, ':robot: 後1分！！！！！！')
+    t.like(ret.timers[1].message, { message: ':robot: 後1分！！！！！！' })
     t.is(ret.timers[2].progress, '*'.repeat(5 * 6))
     // continue
     t.is((await mob.exec(message)).msg.message, ':robot: はじまるよー！')
@@ -133,7 +133,7 @@ test('mob start with number', async t => {
         time: 240,
         sound: './assets/ada_well_done.mp3',
     })
-    const splited = ret.timers[0].message[0].split('\n')
+    const splited = ret.timers[0].message.message.split('\n')
     t.regex(splited[0], /:robot: 4分たちました! <@[0-9].+> <@[0-9].+> <@[0-9].+>/)
     t.is(splited[1], ':robot: ')
     checkOrderList(t, splited.slice(2, 6))
@@ -141,8 +141,8 @@ test('mob start with number', async t => {
         time: 180,
         sound: undefined,
     })
-    t.is(ret.timers[0].message[1].custom_id, 'mob-start')
-    t.is(ret.timers[1].message, ':robot: 後1分！！！！！！')
+    t.is(ret.timers[0].message.component.custom_id, 'mob-start')
+    t.like(ret.timers[1].message, { message: ':robot: 後1分！！！！！！' })
     t.is(ret.timers[2].progress, '*'.repeat(4 * 6))
     const message3 = createMessageChain(message, '!mob start 2')
     t.is((await mob.exec(message3)).timers[0].time, 2 * 60)

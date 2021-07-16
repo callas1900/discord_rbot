@@ -103,8 +103,8 @@ module.exports.exec = async function(message) {
         const startBtn = buttonutil.buttons.get('mob-start')
         // set timer
         timers = []
-        timers.push({ message: [ timer_msg, startBtn ], time: time * 60, sound: './assets/ada_well_done.mp3' })
-        timers.push({ message: ':robot: 後1分！！！！！！', time: (time - 1) * 60 })
+        timers.push({ message: { message: timer_msg, component: startBtn }, time: time * 60, sound: './assets/ada_well_done.mp3' })
+        timers.push({ message: { message: ':robot: 後1分！！！！！！' }, time: (time - 1) * 60 })
         timers.push({ progress: '*'.repeat(time * 6), time: 0 })
         setMEMBERS(message, members)
         const cancelBtn = buttonutil.buttons.get('mob-cancel')
@@ -138,12 +138,12 @@ module.exports.exec = async function(message) {
     }
     case 'fire': {
         timers = []
-        timers.push({ message: ':robot: ベクターキャノンモードヘ移行', time: 0, sound: './assets/ada_vector_canon.mp3' })
-        timers.push({ message: ':robot: エネルギーライン、全段直結', time: 5 })
-        timers.push({ message: ':robot: ランディングギア、アイゼン、ロック', time: 8 })
-        timers.push({ message: ':robot: チャンバー内、正常加圧中', time: 11 })
-        timers.push({ message: ':robot: ライフリング回転開始', time: 14 })
-        timers.push({ message: ':robot: 撃てます', time: 16 })
+        timers.push({ message: { message: ':robot: ベクターキャノンモードヘ移行' }, time: 0, sound: './assets/ada_vector_canon.mp3' })
+        timers.push({ message: { message: ':robot: エネルギーライン、全段直結' }, time: 5 })
+        timers.push({ message: { message: ':robot: ランディングギア、アイゼン、ロック' }, time: 8 })
+        timers.push({ message: { message: ':robot: チャンバー内、正常加圧中' }, time: 11 })
+        timers.push({ message: { message: ':robot: ライフリング回転開始' }, time: 14 })
+        timers.push({ message: { message: ':robot: 撃てます' }, time: 16 })
         break
     }
     default: {
