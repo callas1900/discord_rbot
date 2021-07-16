@@ -1,4 +1,6 @@
 const buttonutil = require('../util/button.js')
+const startBtn = buttonutil.buttons.get('mob-start')
+const cancelBtn = buttonutil.buttons.get('mob-cancel')
 const MEMBERS = new Map()
 const INIT = new Map()
 let DEBUG = false
@@ -68,6 +70,7 @@ module.exports.exec = async function(message) {
         timers = []
         timers.push({ time: 0, sound: './assets/ada_morning.mp3' })
         setMEMBERS(message, members)
+        msg.component = startBtn
         break
     }
     case 'start': {
@@ -100,14 +103,12 @@ module.exports.exec = async function(message) {
         const preDriver = members.shift()
         members.push(preDriver)
         timer_msg += (`\n:robot: ${getOrderText(members)}`)
-        const startBtn = buttonutil.buttons.get('mob-start')
         // set timer
         timers = []
         timers.push({ message: { message: timer_msg, component: startBtn }, time: time * 60, sound: './assets/ada_well_done.mp3' })
         timers.push({ message: { message: ':robot: 後1分！！！！！！' }, time: (time - 1) * 60 })
         timers.push({ progress: '*'.repeat(time * 6), time: 0 })
         setMEMBERS(message, members)
-        const cancelBtn = buttonutil.buttons.get('mob-cancel')
         msg.component = cancelBtn
         break
     }
@@ -116,6 +117,7 @@ module.exports.exec = async function(message) {
         msg.message += 'はいよ！'
         msg.message += getOrderText(members)
         timers = []
+        msg.component = startBtn
         break
     }
     case 'debug': {

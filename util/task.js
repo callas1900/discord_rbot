@@ -3,7 +3,7 @@ const posi = ':green_circle:'
 const nega = ':black_circle:'
 const prefix = 'progress:'
 module.exports = function(message) {
-    _tasks.set('message', (m) => { 
+    _tasks.set('message', (m) => {
         if (!m.component) { m.component = null }
         message.channel.send(m.message, m.component)
     })

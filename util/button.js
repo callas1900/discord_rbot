@@ -4,7 +4,7 @@ const cancelId = 'mob-cancel'
 module.exports.buttons = new Map()
     .set(startId, new MessageButton()
         .setStyle('green')
-        .setLabel('continue')
+        .setLabel('start')
         .setID(startId))
     .set(cancelId, new MessageButton()
         .setStyle('red')
@@ -19,6 +19,8 @@ module.exports.reply = function(button) {
     case cancelId:
         message = '!mob cancel'
         break
+    default:
+        message = null
     }
     return message
 }

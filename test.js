@@ -1,6 +1,9 @@
 const test = require('ava')
 const Discord = require('discord.js')
 const mob = require('./module/mob.js')
+const buttonutil = require('./util/button.js')
+const startBtn = buttonutil.buttons.get('mob-start')
+const cancelBtn = buttonutil.buttons.get('mob-cancel')
 
 function createMessageChain(message, text, names = []) {
     return createMessage(text, names, message.member.voice.channel.id)
@@ -79,7 +82,7 @@ test('mob start initialization', async t => {
 test('mob ready', async t => {
     const message = createMessage('!mob ready', ['aaa', 'bbb', 'ccc'])
     const ret = await mob.exec(message)
-    t.like(ret.msg, { message: ':robot: メンバーは aaa bbb ccc ', component: null })
+    t.like(ret.msg, { message: ':robot: メンバーは aaa bbb ccc ', component: startBtn })
     t.is(ret.timers.length, 1)
     t.like(ret.timers[0], {
         time: 0,
@@ -98,7 +101,7 @@ test('mob start', async t => {
     t.regex(splited[0], /:robot: シャッフルしまーす => \[[ ]...,[ ]...,[ ]...,[ ]{2}\]/)
     t.is(splited[1], '')
     checkOrderList(t, splited.slice(2, 6))
-    t.is(ret.msg.component.custom_id, 'mob-cancel')
+    t.is(ret.msg.component, cancelBtn)
     t.is(ret.timers.length, 3)
     t.like(ret.timers[0], {
         time: 5 * 60,
@@ -108,7 +111,7 @@ test('mob start', async t => {
     t.regex(splited[0], /:robot: 5分たちました! <@[0-9].+> <@[0-9].+> <@[0-9].+>/)
     t.regex(splited[1], /:robot: /)
     checkOrderList(t, splited.slice(2, 6))
-    t.is(ret.timers[0].message.component.custom_id, 'mob-start')
+    t.is(ret.timers[0].message.component, startBtn)
     t.like(ret.timers[1], {
         time: 4 * 60,
         sound: undefined,
@@ -116,15 +119,15 @@ test('mob start', async t => {
     t.like(ret.timers[1].message, { message: ':robot: 後1分！！！！！！' })
     t.is(ret.timers[2].progress, '*'.repeat(5 * 6))
     // continue
-    t.is((await mob.exec(message)).msg.message, ':robot: はじまるよー！')
-    t.is((await mob.exec(message)).msg.message, ':robot: はじまるよー！')
-    t.is((await mob.exec(message)).msg.message, ':robot: はじまるよー！')
+    t.like((await mob.exec(message)).msg, { message: ':robot: はじまるよー！', component: cancelBtn })
+    t.like((await mob.exec(message)).msg, { message: ':robot: はじまるよー！', component: cancelBtn })
+    t.like((await mob.exec(message)).msg, { message: ':robot: はじまるよー！', component: cancelBtn })
 })
 
 test('mob start with number', async t => {
     // ready
     const message = createMessage('!mob ready', ['aaa', 'bbb', 'ccc'])
-    t.like((await mob.exec(message)).msg, { message: ':robot: メンバーは aaa bbb ccc ', component: null })
+    t.like((await mob.exec(message)).msg, { message: ':robot: メンバーは aaa bbb ccc ', component: startBtn })
     // start
     const message2 = createMessageChain(message, '!mob start 4')
     const ret = await mob.exec(message2)
@@ -141,7 +144,7 @@ test('mob start with number', async t => {
         time: 180,
         sound: undefined,
     })
-    t.is(ret.timers[0].message.component.custom_id, 'mob-start')
+    t.is(ret.timers[0].message.component, startBtn)
     t.like(ret.timers[1].message, { message: ':robot: 後1分！！！！！！' })
     t.is(ret.timers[2].progress, '*'.repeat(4 * 6))
     const message3 = createMessageChain(message, '!mob start 2')
@@ -270,4 +273,14 @@ test('auto leving from vc when bot becomes alone', t => {
     calledFnLeave = false
     watcher.exec(clientWithOtherMember)
     t.falsy(calledFnLeave)
+})
+
+test('buttons', t => {
+    const buttons = require('./util/button.js')
+    t.is(buttons.buttons.get('mob-start'), startBtn)
+    t.is(buttons.buttons.get('mob-cancel'), cancelBtn)
+    t.is(buttons.buttons.size, 2)
+    t.is(buttons.reply({ id: 'mob-start' }), '!mob start')
+    t.is(buttons.reply({ id: 'mob-cancel' }), '!mob cancel')
+    t.is(buttons.reply({ id: 'dummy' }), null)
 })
