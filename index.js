@@ -29,6 +29,7 @@ client.on('clickButton', async (btn) => {
     if (message) {
         await btn.reply.send(message)
         btn.reply.delete()
+        btn.message.edit(message.content, null)
     }
 })
 client.on('voiceStateUpdate', (_oldState, _state) => {
