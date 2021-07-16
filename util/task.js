@@ -7,7 +7,14 @@ module.exports = function(message) {
         if (!m.component) { m.component = null }
         message.channel.send(m.message, m.component)
     })
-    _tasks.set('sound', async (s) => { (await message.member.voice.channel.join()).play(s)})
+    _tasks.set('sound', async (s) => {
+        try {
+            (await message.member.voice.channel.join()).play(s)
+        }
+        catch (e) {
+            console.error(e)
+        }
+    })
     _tasks.set('progress', async (m) => {
         const scale = m.length
         const botmessage = await message.channel.send(prefix + posi.repeat(scale))
