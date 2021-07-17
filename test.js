@@ -15,11 +15,18 @@ function createMessage(text, names = [], id = Discord.SnowflakeUtil.generate()) 
     names.forEach((name)=> {
         members.set(Discord.SnowflakeUtil.generate(), createMember(name))
     })
-    return { content:text, member: { voice: { channel: {
-        id: id,
-        members: members,
-        join: (()=>{ return { play: (file) => { console.log(file) } } }),
-    } } } }
+    return {
+        content: text,
+        channel: { id: Discord.SnowflakeUtil.generate() },
+        member: { voice: { channel: {
+            id: id,
+            members: members,
+            join: (() => {
+                return { play: (_file) => {
+                    // empty
+                } }
+            }),
+        } } } }
 }
 
 function createMember(name, id = Discord.SnowflakeUtil.generate()) {
@@ -228,7 +235,7 @@ test('timer util', t => {
 
 test('timer util with sound', t => {
     const timerutil = require('./util/timer.js')
-    const task = [
+    const tasks = [
         () => {
             // dummy function
         },
@@ -239,9 +246,9 @@ test('timer util with sound', t => {
     const voice = (s) => {t.is(s, '')}
     const timer = { message: 'test-message', time: 0, sound: 'test-sound' }
     const id = Discord.SnowflakeUtil.generate()
-    timerutil([timer], id, task)
+    timerutil([timer], id, tasks)
     t.is(store.TIMERS.get(id).length, 1)
-    timerutil([timer], id, task, voice)
+    timerutil([timer], id, tasks, voice)
     t.is(store.TIMERS.get(id).length, 2)
 })
 

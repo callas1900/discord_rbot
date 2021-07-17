@@ -22,6 +22,9 @@ class Timers {
         }
         this.size = this.timers.size
     }
+    dump() {
+        return this.timers
+    }
 }
 const timersHolder = new Timers()
 module.exports.TIMERS = timersHolder

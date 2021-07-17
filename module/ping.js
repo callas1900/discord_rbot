@@ -1,5 +1,4 @@
-module.exports.exec = function(message) {
-    console.log(message.content)
+module.exports.exec = function(_message) {
     return { msg: 'Pong.' }
 }
 
