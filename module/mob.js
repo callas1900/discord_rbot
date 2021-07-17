@@ -1,8 +1,8 @@
 const buttonutil = require('../util/button.js')
+const { INIT } = require('../util/store.js')
 const startBtn = buttonutil.buttons.get('mob-start'),
     cancelBtn = buttonutil.buttons.get('mob-cancel')
-const MEMBERS = new Map(),
-    INIT = new Map()
+const MEMBERS = new Map()
 let DEBUG = false
 function shuffle(a) {
     let j, x, i
@@ -15,14 +15,6 @@ function shuffle(a) {
     return a
 }
 
-function setINIT(message, bool = true) {
-    INIT.set(message.member.voice.channel.id, bool)
-}
-
-function getINIT(message) {
-    return INIT.get(message.member.voice.channel.id)
-}
-
 function setMEMBERS(message, array = []) {
     MEMBERS.set(message.member.voice.channel.id, array)
 }
@@ -33,7 +25,7 @@ function getMEMBERS(message) {
 
 function init(message) {
     setMEMBERS(message)
-    setINIT(message)
+    INIT.clear(message)
 }
 
 function getOrderText(members) {
@@ -42,7 +34,7 @@ function getOrderText(members) {
 
 module.exports.exec = async function(message) {
     const commands = message.content.split(' ')
-    let msg = { message: ':robot: ', component: null }
+    const msg = { message: ':robot: ', component: null }
     let timers
     switch(commands[1]) {
     case 'ready': {
@@ -82,13 +74,13 @@ module.exports.exec = async function(message) {
             msg.message += '`!mob ready` を先に実行してください'
             break
         }
-        if (getINIT(message)) {
+        if (INIT.get(message)) {
             members = shuffle(members)
             msg.message += 'シャッフルしまーす => [ '
             members.forEach(member => {msg.message += member.name + ', '})
             msg.message += ' ]\n'
             msg.message += getOrderText(members)
-            setINIT(message, false)
+            INIT.set(message, false)
         }
         else {
             msg.message += 'はじまるよー！'
@@ -126,7 +118,7 @@ module.exports.exec = async function(message) {
             msg.message += ' }\n'
         })
         msg.message += '\nINIT:\n'
-        INIT.forEach((v, k) => { msg += (`${k} => ${v},\n`) })
+        msg.message += INIT.dump()
         msg.message += '\nDEBUG:\n'
         msg.message += DEBUG
         if (commands[2]) {

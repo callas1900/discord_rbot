@@ -1,7 +1,8 @@
-class Timers {
-    constructor() {
-        this.timers = new Map()
-        this.size = this.timers.size
+class Store {
+    constructor(initializer) {
+        this.store = new Map()
+        this.size = this.store.size
+        this.initializer = initializer
     }
 
     _getId(message) {
@@ -14,32 +15,41 @@ class Timers {
 
     get(message) {
         const id = this._getId(message)
-        if (!this.timers.get(id)) {
-            this.timers.set(id, [])
+        if (this.store.get(id) === undefined) {
+            this.store.set(id, this.initializer())
         }
-        return (id) ? this.timers.get(id) : null
+        return (id) ? this.store.get(id) : null
     }
 
-    set(message, timer) {
+    set(message, arg) {
         const id = this._getId(message)
         if (!id) { return }
-        this.timers.set(id, timer)
-        this.size = this.timers.size
+        this.store.set(id, arg)
+        this.size = this.store.size
     }
 
     clear(message) {
         const id = this._getId(message)
-        if (this.timers.get(id)) {
-            this.timers.get(id).forEach((t) => {
-                clearTimeout(t)
-            })
-            this.timers.set(id, [])
+        if (this.store.get(id)) {
+            const init = this.initializer(this.store.get(id))
+            this.store.set(id, init)
         }
-        this.size = this.timers.size
+        this.size = this.store.size
     }
     dump() {
-        return this.timers
+        let text = `store size = ${this.store.size}\n`
+        this.store.forEach((v, k) => {
+            text += `   ${k}: [${(Array.isArray(v) ? v.length : v)}]\n`
+        })
+        return text
     }
 }
-const timersHolder = new Timers()
+const timersHolder = new Store((timers) => {
+    if (timers) {
+        timers.forEach((t) => { clearTimeout(t) })
+    }
+    return []
+})
+const initHolder = new Store(() => { return true })
 module.exports.TIMERS = timersHolder
+module.exports.INIT = initHolder
