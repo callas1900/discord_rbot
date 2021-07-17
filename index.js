@@ -18,7 +18,7 @@ client.on('message', async message => {
     try {
         const ret = await cmd.exec(message)
         if (ret.msg) { message.channel.send(ret.msg.message, ret.msg.component) }
-        if (ret.timers) { timerutil(ret.timers, cmd.id, taskutil(message)) }
+        if (ret.timers) { timerutil(ret.timers, cmd.id, taskFactory(message, cmd.id)) }
     }
     catch (error) {
         console.error(error)
