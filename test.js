@@ -263,7 +263,7 @@ function setupClient(checker, isConnection, memberNumber) {
     }
     const connections = new Map()
     if (isConnection) {
-        connections.set(Discord.SnowflakeUtil.generate(), { channel: { members: members, leave: checker } })
+        connections.set(Discord.SnowflakeUtil.generate(), { channel: { id: Discord.SnowflakeUtil.generate(), members: members, leave: checker } })
     }
     return { user: { id: botId }, voice: { connections: connections } }
 }

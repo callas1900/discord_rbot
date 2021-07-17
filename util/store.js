@@ -30,11 +30,17 @@ class Store {
     }
 
     clear(message) {
-        const id = this._getId(message)
+        this.clearById(this._getId(message))
+    }
+
+    clearById(id) {
         if (this.store.get(id)) {
             this.store.set(id, this.initializer(this.store.get(id)))
         }
         this.size = this.store.size
+    }
+    remove(id) {
+        this.store.delete(id)
     }
     dump() {
         let text = `store size = ${ this.store.size }\n`
@@ -63,3 +69,9 @@ const membersHolder = new Store(() => { return [] },
 module.exports.TIMERS = timersHolder
 module.exports.INIT = initHolder
 module.exports.MEMBERS = membersHolder
+module.exports.clearAll = (id) => {
+    [ timersHolder, initHolder, membersHolder ].forEach((store) => {
+        store.clearById(id)
+        store.remove(id)
+    })
+}
