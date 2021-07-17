@@ -1,8 +1,7 @@
 const buttonutil = require('../util/button.js')
-const { INIT } = require('../util/store.js')
+const { INIT, MEMBERS, TIMERS } = require('../util/store.js')
 const startBtn = buttonutil.buttons.get('mob-start'),
     cancelBtn = buttonutil.buttons.get('mob-cancel')
-const MEMBERS = new Map()
 let DEBUG = false
 function shuffle(a) {
     let j, x, i
@@ -15,16 +14,8 @@ function shuffle(a) {
     return a
 }
 
-function setMEMBERS(message, array = []) {
-    MEMBERS.set(message.member.voice.channel.id, array)
-}
-
-function getMEMBERS(message) {
-    return MEMBERS.get(message.member.voice.channel.id)
-}
-
 function init(message) {
-    setMEMBERS(message)
+    MEMBERS.clear(message)
     INIT.clear(message)
 }
 
@@ -59,13 +50,13 @@ module.exports.exec = async function(message) {
         })
         timers = []
         timers.push({ time: 0, sound: './assets/ada_morning.mp3' })
-        setMEMBERS(message, members)
+        MEMBERS.set(message, members)
         msg.component = startBtn
         break
     }
     case 'start': {
         const time = commands[2] ? (isNaN(commands[2])) ? -99 : eval(commands[2]) : 5
-        let members = getMEMBERS(message)
+        let members = MEMBERS.get(message)
         if (time < 2 || time > 30) {
             msg.message += '入力値は2以上、30以下です。'
             break
@@ -98,12 +89,12 @@ module.exports.exec = async function(message) {
         timers.push({ message: { message: timer_msg, component: startBtn }, time: time * 60, sound: './assets/ada_well_done.mp3' })
         timers.push({ message: { message: ':robot: 後1分！！！！！！' }, time: (time - 1) * 60 })
         timers.push({ progress: '*'.repeat(time * 6), time: 0 })
-        setMEMBERS(message, members)
+        MEMBERS.set(message, members)
         msg.component = cancelBtn
         break
     }
     case 'cancel': {
-        const members = getMEMBERS(message)
+        const members = MEMBERS.get(message)
         msg.message += 'はいよ！'
         msg.message += getOrderText(members)
         timers = []
@@ -112,13 +103,11 @@ module.exports.exec = async function(message) {
     }
     case 'debug': {
         msg.message += '\nMEMBERS:\n'
-        MEMBERS.forEach((v, k) => {
-            msg.message += `{ ${k} => `
-            v.forEach((user) => { msg.message += `[${user.id} : ${user.name}],` })
-            msg.message += ' }\n'
-        })
+        msg.message += MEMBERS.dump()
         msg.message += '\nINIT:\n'
         msg.message += INIT.dump()
+        msg.message += '\nTIMERS:\n'
+        msg.message += TIMERS.dump()
         msg.message += '\nDEBUG:\n'
         msg.message += DEBUG
         if (commands[2]) {

@@ -1,8 +1,9 @@
 class Store {
-    constructor(initializer) {
+    constructor(initializer, dumper) {
         this.store = new Map()
         this.size = this.store.size
         this.initializer = initializer
+        this.dumper = dumper
     }
 
     _getId(message) {
@@ -31,25 +32,34 @@ class Store {
     clear(message) {
         const id = this._getId(message)
         if (this.store.get(id)) {
-            const init = this.initializer(this.store.get(id))
-            this.store.set(id, init)
+            this.store.set(id, this.initializer(this.store.get(id)))
         }
         this.size = this.store.size
     }
     dump() {
-        let text = `store size = ${this.store.size}\n`
+        let text = `store size = ${ this.store.size }\n`
         this.store.forEach((v, k) => {
-            text += `   ${k}: [${(Array.isArray(v) ? v.length : v)}]\n`
+            text += `----${ k }: [${ this.dumper(v) }]\n`
         })
         return text
     }
 }
+
 const timersHolder = new Store((timers) => {
     if (timers) {
         timers.forEach((t) => { clearTimeout(t) })
     }
     return []
-})
-const initHolder = new Store(() => { return true })
+}, (timers) => { return timers.length })
+const initHolder = new Store(() => { return true },
+    (v) => { return `----${v}` })
+const membersHolder = new Store(() => { return [] },
+    (users) => {
+        let text = ''
+        users.forEach(user => { text += `\n---------[${user.id} : ${user.name}],` })
+        return text
+    })
+
 module.exports.TIMERS = timersHolder
 module.exports.INIT = initHolder
+module.exports.MEMBERS = membersHolder
