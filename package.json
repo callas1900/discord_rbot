@@ -4,10 +4,11 @@
   "description": "bot for discord server",
   "main": "index.js",
   "scripts": {
-    "bot": "node index.js",
+    "start": "node index.js",
     "test": "ava",
     "testch": "ava --watch",
     "lint": "eslint .",
+    "lintch": "watch -n1 npm run lint .",
     "lint:fix": "npm run lint -- --fix"
   },
   "dependencies": {

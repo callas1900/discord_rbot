@@ -2,6 +2,7 @@ const test = require('ava')
 const Discord = require('discord.js')
 const mob = require('./module/mob.js')
 const buttonutil = require('./util/button.js')
+const store = require('./util/store.js')
 const startBtn = buttonutil.buttons.get('mob-start')
 const cancelBtn = buttonutil.buttons.get('mob-cancel')
 
@@ -207,22 +208,22 @@ test('timer util', t => {
     const timer1 = { message: 'test-message', time: 0 }
     // id check
     timerutil([timer1], '1', task)
-    t.is(timerutil.list().size, 1)
+    t.is(store.TIMERS.size, 1)
     timerutil([timer1], '1', task)
-    t.is(timerutil.list().size, 1)
+    t.is(store.TIMERS.size, 1)
     timerutil([timer1], '2', task)
-    t.is(timerutil.list().size, 2)
+    t.is(store.TIMERS.size, 2)
     timerutil([timer1], '2', task)
-    t.is(timerutil.list().size, 2)
+    t.is(store.TIMERS.size, 2)
     timerutil([timer1], '3', task)
-    t.is(timerutil.list().size, 3)
+    t.is(store.TIMERS.size, 3)
     // timer list check
-    t.is(timerutil.list().get('1').length, 2)
+    t.is(store.TIMERS.get('1').length, 2)
     // clear id-1's list
     timerutil([], '1', task)
-    t.is(timerutil.list().get('1').length, 0)
-    t.is(timerutil.list().get('2').length, 2)
-    t.is(timerutil.list().get('3').length, 1)
+    t.is(store.TIMERS.get('1').length, 0)
+    t.is(store.TIMERS.get('2').length, 2)
+    t.is(store.TIMERS.get('3').length, 1)
 })
 
 test('timer util with sound', t => {
@@ -237,10 +238,11 @@ test('timer util with sound', t => {
     ]
     const voice = (s) => {t.is(s, '')}
     const timer = { message: 'test-message', time: 0, sound: 'test-sound' }
-    timerutil([timer], '1', task)
-    t.is(timerutil.list().get('1').length, 1)
-    timerutil([timer], '1', task, voice)
-    t.is(timerutil.list().get('1').length, 2)
+    const id = Discord.SnowflakeUtil.generate()
+    timerutil([timer], id, task)
+    t.is(store.TIMERS.get(id).length, 1)
+    timerutil([timer], id, task, voice)
+    t.is(store.TIMERS.get(id).length, 2)
 })
 
 function setupClient(checker, isConnection, memberNumber) {

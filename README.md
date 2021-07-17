@@ -4,7 +4,7 @@
 2. Put your discord bot token into the file with this format `TOKEN={your_token}`.
 3. run
 ```
-npm run bot
+npm start
 ```
 
 # How to deploy (heroku)

@@ -1,8 +1,8 @@
 const buttonutil = require('../util/button.js')
-const startBtn = buttonutil.buttons.get('mob-start')
-const cancelBtn = buttonutil.buttons.get('mob-cancel')
-const MEMBERS = new Map()
-const INIT = new Map()
+const startBtn = buttonutil.buttons.get('mob-start'),
+    cancelBtn = buttonutil.buttons.get('mob-cancel')
+const MEMBERS = new Map(),
+    INIT = new Map()
 let DEBUG = false
 function shuffle(a) {
     let j, x, i
@@ -39,8 +39,6 @@ function init(message) {
 function getOrderText(members) {
     return `\n${'-'.repeat(20)}\n:red_car: driver        => [${members[0].name}]\n:map: navigator => [${members[(DEBUG) ? 0 : 1].name}]\n${'-'.repeat(20)}`
 }
-
-module.exports.getMembers = () => { return MEMBERS }
 
 module.exports.exec = async function(message) {
     const commands = message.content.split(' ')

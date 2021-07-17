@@ -1,15 +1,7 @@
-function clear(id) {
-    if (TIMERS.get(id)) {
-        TIMERS.get(id).forEach((t) => {
-            clearTimeout(t)
-        })
-        TIMERS.set(id, [])
-    }
-}
-const TIMERS = new Map()
+const { TIMERS } = require('./store.js')
 module.exports = function(timers, id, tasks) {
     if (timers.length === 0) {
-        clear(id)
+        TIMERS.clear(id)
     }
     else {
         if (!TIMERS.get(id)) {
@@ -28,4 +20,3 @@ module.exports = function(timers, id, tasks) {
         })
     }
 }
-module.exports.list = () => { return TIMERS }
