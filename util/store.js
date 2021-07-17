@@ -4,16 +4,31 @@ class Timers {
         this.size = this.timers.size
     }
 
-    get(id) {
-        return this.timers.get(id)
+    _getId(message) {
+        if (!(message && message.member && message.member.voice && message.member.voice.channel)) {
+            console.error('irregal argument')
+            return null
+        }
+        return message.member.voice.channel.id
     }
 
-    set(id, timer) {
+    get(message) {
+        const id = this._getId(message)
+        if (!this.timers.get(id)) {
+            this.timers.set(id, [])
+        }
+        return (id) ? this.timers.get(id) : null
+    }
+
+    set(message, timer) {
+        const id = this._getId(message)
+        if (!id) { return }
         this.timers.set(id, timer)
         this.size = this.timers.size
     }
 
-    clear(id) {
+    clear(message) {
+        const id = this._getId(message)
         if (this.timers.get(id)) {
             this.timers.get(id).forEach((t) => {
                 clearTimeout(t)

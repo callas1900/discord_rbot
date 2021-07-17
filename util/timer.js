@@ -1,11 +1,11 @@
 const { TIMERS } = require('./store.js')
-module.exports = function(timers, id, tasks) {
+module.exports = function(timers, message, tasks) {
     if (timers.length === 0) {
-        TIMERS.clear(id)
+        TIMERS.clear(message)
     }
     else {
-        if (!TIMERS.get(id)) {
-            TIMERS.set(id, [])
+        if (!TIMERS.get(message)) {
+            TIMERS.set(message, [])
         }
         timers.forEach((timer) => {
             const order = () => {
@@ -16,7 +16,7 @@ module.exports = function(timers, id, tasks) {
                 })
             }
             const t = setTimeout(order, timer.time * 1000)
-            TIMERS.get(id).push(t)
+            TIMERS.get(message).push(t)
         })
     }
 }

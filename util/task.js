@@ -1,3 +1,4 @@
+const { TIMERS } = require('./store.js')
 const _tasks = new Map()
 const posi = ':green_circle:'
 const nega = ':black_circle:'
@@ -30,6 +31,7 @@ module.exports = function(message) {
                 console.log('clear progress!')
             }
         }, 10 * 1000)
+        TIMERS.get(message).push(interval)
     })
     return _tasks
 }

@@ -17,7 +17,9 @@ function createMessage(text, names = [], id = Discord.SnowflakeUtil.generate()) 
     })
     return {
         content: text,
-        channel: { id: Discord.SnowflakeUtil.generate() },
+        channel: { id: Discord.SnowflakeUtil.generate(), send: () => {
+            // empty
+        } },
         member: { voice: { channel: {
             id: id,
             members: members,
@@ -214,23 +216,24 @@ test('timer util', t => {
     ]
     const timer1 = { message: 'test-message', time: 0 }
     // id check
-    timerutil([timer1], '1', task)
-    t.is(store.TIMERS.size, 1)
-    timerutil([timer1], '1', task)
-    t.is(store.TIMERS.size, 1)
-    timerutil([timer1], '2', task)
-    t.is(store.TIMERS.size, 2)
-    timerutil([timer1], '2', task)
-    t.is(store.TIMERS.size, 2)
-    timerutil([timer1], '3', task)
-    t.is(store.TIMERS.size, 3)
-    // timer list check
-    t.is(store.TIMERS.get('1').length, 2)
+    const message1 = createMessage('1')
+    const message2 = createMessage('2')
+    const message3 = createMessage('3')
+    timerutil([timer1], message1, task)
+    t.is(store.TIMERS.get(message1).length, 1)
+    timerutil([timer1], message1, task)
+    t.is(store.TIMERS.get(message1).length, 2)
+    timerutil([timer1], message2, task)
+    t.is(store.TIMERS.get(message2).length, 1)
+    timerutil([timer1], message2, task)
+    t.is(store.TIMERS.get(message2).length, 2)
+    timerutil([timer1], message3, task)
+    t.is(store.TIMERS.get(message3).length, 1)
     // clear id-1's list
-    timerutil([], '1', task)
-    t.is(store.TIMERS.get('1').length, 0)
-    t.is(store.TIMERS.get('2').length, 2)
-    t.is(store.TIMERS.get('3').length, 1)
+    timerutil([], message1, task)
+    t.is(store.TIMERS.get(message1).length, 0)
+    t.is(store.TIMERS.get(message2).length, 2)
+    t.is(store.TIMERS.get(message3).length, 1)
 })
 
 test('timer util with sound', t => {
@@ -245,11 +248,11 @@ test('timer util with sound', t => {
     ]
     const voice = (s) => {t.is(s, '')}
     const timer = { message: 'test-message', time: 0, sound: 'test-sound' }
-    const id = Discord.SnowflakeUtil.generate()
-    timerutil([timer], id, tasks)
-    t.is(store.TIMERS.get(id).length, 1)
-    timerutil([timer], id, tasks, voice)
-    t.is(store.TIMERS.get(id).length, 2)
+    const message = createMessage('dummy')
+    timerutil([timer], message, tasks)
+    t.is(store.TIMERS.get(message).length, 1)
+    timerutil([timer], message, tasks, voice)
+    t.is(store.TIMERS.get(message).length, 2)
 })
 
 function setupClient(checker, isConnection, memberNumber) {
@@ -292,4 +295,44 @@ test('buttons', t => {
     t.is(buttons.reply({ id: 'mob-start' }), '!mob start')
     t.is(buttons.reply({ id: 'mob-cancel' }), '!mob cancel')
     t.is(buttons.reply({ id: 'dummy' }), null)
+})
+
+test('task factory message', t => {
+    const taskFactory = require('./util/task.js')
+    const message = createMessage('dummy')
+    let sendMessage
+    let sendComponent
+    message.channel.send = (m, c) => {
+        sendMessage = m
+        sendComponent = c
+    }
+    const tasks = taskFactory(message)
+    const text = Discord.SnowflakeUtil.generate()
+    tasks.get('message')({ message: text })
+    t.is(sendMessage, text)
+    t.is(sendComponent, null)
+    tasks.get('message')({ message: text, component: startBtn })
+    t.is(sendMessage, text)
+    t.is(sendComponent, startBtn)
+})
+
+test('task factory sound', async t => {
+    const taskFactory = require('./util/task.js')
+    let played = ''
+    const message = createMessage('dummy')
+    message.member.voice.channel.join =
+        () => { return { play: (f) => { played = f} }}
+    const tasks = taskFactory(message)
+    const file = 'test.mp3'
+    await tasks.get('sound')(file)
+    t.is(played, file)
+})
+
+test('task factory progress', async t => {
+    const taskFactory = require('./util/task.js')
+    const message = createMessage('dummy')
+    const tasks = taskFactory(message)
+    await tasks.get('progress')('*****')
+    t.is(store.TIMERS.get(message).length, 1)
+    t.is(store.TIMERS.get(message)[0]._repeat, 10000)
 })
