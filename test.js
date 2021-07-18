@@ -92,7 +92,8 @@ test('mob start initialization', async t => {
 test('mob ready', async t => {
     const message = createMessage('!mob ready', ['aaa', 'bbb', 'ccc'])
     const ret = await mob.exec(message)
-    t.like(ret.msg, { message: ':robot: メンバーは aaa bbb ccc ', component: startBtn })
+    t.regex(ret.msg.message, /:robot: メンバーは ... ... ... /)
+    t.is(ret.msg.component, startBtn)
     t.is(ret.timers.length, 1)
     t.like(ret.timers[0], {
         time: 0,
@@ -137,10 +138,12 @@ test('mob start', async t => {
 test('mob start with number', async t => {
     // ready
     const message = createMessage('!mob ready', ['aaa', 'bbb', 'ccc'])
-    t.like((await mob.exec(message)).msg, { message: ':robot: メンバーは aaa bbb ccc ', component: startBtn })
+    let ret = await mob.exec(message)
+    t.regex(ret.msg.message, /:robot: メンバーは ... ... ... /)
+    t.is(ret.msg.component, startBtn)
     // start
     const message2 = createMessageChain(message, '!mob start 4')
-    const ret = await mob.exec(message2)
+    ret = await mob.exec(message2)
     t.is(ret.timers.length, 3)
     t.like(ret.timers[0], {
         time: 240,

@@ -1,19 +1,7 @@
 const buttonutil = require('../util/button.js')
 const { INIT, MEMBERS, TIMERS } = require('../util/store.js')
-const pm = require('./_process_manager.js'),
-    mm = require('./_member_manager.js')
-const startBtn = buttonutil.buttons.get('mob-start'),
-    cancelBtn = buttonutil.buttons.get('mob-cancel')
-function shuffle(a) {
-    let j, x, i
-    for (i = a.length - 1; i > 0; i--) {
-        j = Math.floor(Math.random() * (i + 1))
-        x = a[i]
-        a[i] = a[j]
-        a[j] = x
-    }
-    return a
-}
+const pm = require('./_process_manager.js'), mm = require('./_member_manager.js')
+const startBtn = buttonutil.buttons.get('mob-start'), cancelBtn = buttonutil.buttons.get('mob-cancel')
 
 function init(message) {
     MEMBERS.clear(message)
@@ -37,39 +25,32 @@ module.exports.exec = async function(message) {
             msg.message += error
             break
         }
-        const loader = pm.createLoader()
-        loader.append(null, 0, './assets/ada_morning.mp3')
-        timers = loader.load()
+        timers = [pm.TimerBuilder().setSound('./assets/ada_morning.mp3')]
         break
     }
     case 'start': {
-        const time = commands[2] ? (isNaN(commands[2])) ? -99 : eval(commands[2]) : 5
-        if (time < 2 || time > 30) {
-            msg.message += '入力値は2以上、30以下です。'
-            break
+        let time = 0
+        let members
+        try {
+            time = pm.getTime(commands[2])
+            members = mm.load(message)
         }
-        let members = MEMBERS.get(message)
-        if (!members || members.length === 0) {
-            msg.message += '`!mob ready` を先に実行してください'
+        catch (error) {
+            msg.message += error
             break
         }
         msg.message += pm.textBuilder('start', [ INIT.get(message), members ])
         msg.component = cancelBtn
         if (INIT.get(message)) {
-            members = shuffle(members)
             INIT.set(message, false)
         }
-        // setup for next
-        const preDriver = members.shift()
-        members.push(preDriver)
-        MEMBERS.set(message, members)
-        const timer_msg = pm.textBuilder('start-timer', [ members, time ])
+        mm.rotate(message, members)
         // set timer
-        const loader = pm.createLoader()
-        loader.appendWithComponent(timer_msg, startBtn, time * 60, './assets/ada_well_done.mp3')
-        loader.append(':robot: 後1分！！！！！！', (time - 1) * 60)
-        loader.appendProgress('*'.repeat(time * 6))
-        timers = loader.load()
+        const timer_msg = pm.textBuilder('start-timer', [ members, time ])
+        timers = [ pm.TimerBuilder().setMessage(timer_msg)
+            .setComponent(startBtn).setTime(time * 60).setSound('./assets/ada_well_done.mp3'),
+        pm.TimerBuilder().setMessage(':robot: 後1分！！！！！！').setTime((time - 1) * 60),
+        pm.TimerBuilder().setProgress('*'.repeat(time * 6))]
         break
     }
     case 'cancel': {
@@ -83,15 +64,13 @@ module.exports.exec = async function(message) {
         break
     }
     case 'fire': {
-        // loader
-        const loader = pm.createLoader()
-        loader.append(':robot: ベクターキャノンモードヘ移行', 0, './assets/ada_vector_canon.mp3')
-        loader.append(':robot: エネルギーライン、全段直結', 5)
-        loader.append(':robot: ランディングギア、アイゼン、ロック', 8)
-        loader.append(':robot: チャンバー内、正常加圧中', 11)
-        loader.append(':robot: ライフリング回転開始', 14)
-        loader.append(':robot: 撃てます', 16)
-        timers = loader.load()
+        timers = [
+            pm.TimerBuilder().setMessage(':robot: ベクターキャノンモードヘ移行').setSound('./assets/ada_vector_canon.mp3'),
+            pm.TimerBuilder().setMessage(':robot: エネルギーライン、全段直結').setTime(5),
+            pm.TimerBuilder().setMessage(':robot: ランディングギア、アイゼン、ロック').setTime(8),
+            pm.TimerBuilder().setMessage(':robot: チャンバー内、正常加圧中').setTime(11),
+            pm.TimerBuilder().setMessage(':robot: ライフリング回転開始').setTime(14),
+            pm.TimerBuilder().setMessage(':robot: 撃てます').setTime(16)]
         break
     }
     default: {
@@ -99,6 +78,6 @@ module.exports.exec = async function(message) {
         break
     }
     }
-    return { msg: msg, timers: timers }
+    return { msg: msg, timers: (timers && timers.length > 0) ? pm.loadTimers(timers) : timers }
 }
 
