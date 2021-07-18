@@ -75,3 +75,8 @@ module.exports.clearAll = (id) => {
         store.remove(id)
     })
 }
+let debug = false
+module.exports.DEBUG = () => { return debug }
+module.exports.setDebug = () => {
+    debug = true
+}
