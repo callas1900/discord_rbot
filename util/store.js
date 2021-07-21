@@ -57,8 +57,6 @@ const timersHolder = new Store((timers) => {
     }
     return []
 }, (timers) => { return timers.length })
-const initHolder = new Store(() => { return true },
-    (v) => { return `----${v}` })
 const membersHolder = new Store(() => { return [] },
     (users) => {
         let text = ''
@@ -67,16 +65,14 @@ const membersHolder = new Store(() => { return [] },
     })
 
 module.exports.TIMERS = timersHolder
-module.exports.INIT = initHolder
 module.exports.MEMBERS = membersHolder
-module.exports.clearAll = (id) => {
-    [ timersHolder, initHolder, membersHolder ].forEach((store) => {
+module.exports.clearAll = (message) => { this.clearAllById(message.member.voice.channel.id) }
+module.exports.clearAllById = (id) => {
+    [ timersHolder, membersHolder ].forEach((store) => {
         store.clearById(id)
         store.remove(id)
     })
 }
 let debug = false
 module.exports.DEBUG = () => { return debug }
-module.exports.setDebug = () => {
-    debug = true
-}
+module.exports.setDebug = (input) => { debug = input }

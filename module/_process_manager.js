@@ -51,16 +51,16 @@ module.exports.loadTimers = (timers) => {
     return arr
 }
 
-function getOrderText(members) {
-    return `\n${'-'.repeat(20)}\n:red_car: driver        => [${members[0].name}]\n:map: navigator => [${members[(DEBUG) ? 0 : 1].name}]\n${'-'.repeat(20)}`
-}
-
 module.exports.getTime = (input) => {
     const time = input ? (isNaN(input)) ? -99 : eval(input) : 5
     if (time < 2 || time > 30) {
         throw '入力値は2以上、30以下です。'
     }
     return time
+}
+
+function getOrderText(members) {
+    return `\n${'-'.repeat(20)}\n:red_car: driver        => [${members[0].name}]\n:map: navigator => [${members[(DEBUG()) ? 0 : 1].name}]\n${'-'.repeat(20)}`
 }
 
 module.exports.textBuilder = (cmd, args = []) => {
@@ -72,20 +72,14 @@ module.exports.textBuilder = (cmd, args = []) => {
         members.forEach(member => {
             text += member.name + ' '
         })
+        text += '\nシャッフルしまーす => [ '
+        members.forEach(member => {text += member.name + ', '})
+        text += ' ]\n'
+        text += getOrderText(members)
         break
     }
     case 'start': {
-        const init = args[0]
-        const members = args[1]
-        if (init) {
-            text += 'シャッフルしまーす => [ '
-            members.forEach(member => {text += member.name + ', '})
-            text += ' ]\n'
-            text += getOrderText(members)
-        }
-        else {
-            text += 'はじまるよー！'
-        }
+        text += 'はじまるよー！'
         break
     }
     case 'start-timer': {
@@ -106,16 +100,18 @@ module.exports.textBuilder = (cmd, args = []) => {
     }
     case 'debug': {
         const MEMBERS = args[0]
-        const INIT = args[1]
-        const TIMERS = args[2]
-        const debug = args[3]
+        const TIMERS = args[1]
+        const debug = args[2]
         text += `\nMEMBERS:\n${MEMBERS.dump()}`
-        text += `\nINIT:\n${INIT.dump()}`
         text += `\nTIMERS:\n${TIMERS.dump()}`
         text += `\nDEBUG = ${DEBUG()}`
         if (debug) {
-            if (debug === 'true') { setDebug() }
-            text += `\n!DEBUG: <= ${DEBUG()}`
+            if (debug) {
+                text += `\ninput = ${debug}`
+                const b = (debug === 'true')
+                text += `\n!DEBUG: <= ${b}`
+                setDebug(b)
+            }
         }
         break
     }

@@ -4,7 +4,7 @@ module.exports.exec = function(client) {
     const vc = client.voice.connections.values().next().value.channel
     if (vc.members.size < 2 && vc.members.keys().next().value === client.user.id) {
         console.log('leave channel')
-        store.clearAll(vc.id)
+        store.clearAllById(vc.id)
         vc.leave()
     }
 }

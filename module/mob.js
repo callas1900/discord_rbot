@@ -1,12 +1,7 @@
 const buttonutil = require('../util/button.js')
-const { INIT, MEMBERS, TIMERS } = require('../util/store.js')
+const { MEMBERS, TIMERS, clearAll } = require('../util/store.js')
 const pm = require('./_process_manager.js'), mm = require('./_member_manager.js')
 const startBtn = buttonutil.buttons.get('mob-start'), cancelBtn = buttonutil.buttons.get('mob-cancel')
-
-function init(message) {
-    MEMBERS.clear(message)
-    INIT.clear(message)
-}
 
 module.exports.exec = async function(message) {
     const commands = message.content.split(' ')
@@ -14,11 +9,11 @@ module.exports.exec = async function(message) {
     let timers
     switch(commands[1]) {
     case 'ready': {
-        init(message)
         try {
             const members = mm.register(message)
             msg.message += pm.textBuilder('ready', [ members ])
             msg.component = startBtn
+            clearAll(message)
             MEMBERS.set(message, members)
         }
         catch (error) {
@@ -34,18 +29,14 @@ module.exports.exec = async function(message) {
         try {
             time = pm.getTime(commands[2])
             members = mm.load(message)
+            msg.message += pm.textBuilder('start', members)
+            msg.component = cancelBtn
         }
         catch (error) {
             msg.message += error
             break
         }
-        msg.message += pm.textBuilder('start', [ INIT.get(message), members ])
-        msg.component = cancelBtn
-        if (INIT.get(message)) {
-            INIT.set(message, false)
-        }
         mm.rotate(message, members)
-        // set timer
         const timer_msg = pm.textBuilder('start-timer', [ members, time ])
         timers = [ pm.TimerBuilder().setMessage(timer_msg)
             .setComponent(startBtn).setTime(time * 60).setSound('./assets/ada_well_done.mp3'),
@@ -60,7 +51,7 @@ module.exports.exec = async function(message) {
         break
     }
     case 'debug': {
-        msg.message += pm.textBuilder('debug', [ MEMBERS, INIT, TIMERS, commands[2] ])
+        msg.message += pm.textBuilder('debug', [ MEMBERS, TIMERS, commands[2] ])
         break
     }
     case 'fire': {

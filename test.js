@@ -39,6 +39,7 @@ function checkOrderList(t, lines) {
     t.is(lines[0], '-'.repeat(20))
     t.regex(lines[1], /:red_car:[ ]driver[ ]{8}=>[ ]\[...\]/)
     t.regex(lines[2], /:map:[ ]navigator[ ]=>[ ]\[...\]/)
+    t.not(lines[1].split('=> ')[1], lines[2].split('=> ')[1])
     t.is(lines[3], '-'.repeat(20))
 }
 
@@ -92,7 +93,12 @@ test('mob start initialization', async t => {
 test('mob ready', async t => {
     const message = createMessage('!mob ready', ['aaa', 'bbb', 'ccc'])
     const ret = await mob.exec(message)
-    t.regex(ret.msg.message, /:robot: メンバーは ... ... ... /)
+
+    const splited = ret.msg.message.split('\n')
+    t.regex(splited[0], /:robot: メンバーは ... ... ... /)
+    t.regex(splited[1], /シャッフルしまーす => \[[ ]...,[ ]...,[ ]...,[ ]{2}\]/)
+    t.is(splited[2], '')
+    checkOrderList(t, splited.slice(3, 7))
     t.is(ret.msg.component, startBtn)
     t.is(ret.timers.length, 1)
     t.like(ret.timers[0], {
@@ -108,17 +114,14 @@ test('mob start', async t => {
     // start
     message = createMessageChain(message, '!mob start')
     ret = await mob.exec(message)
-    let splited = ret.msg.message.split('\n')
-    t.regex(splited[0], /:robot: シャッフルしまーす => \[[ ]...,[ ]...,[ ]...,[ ]{2}\]/)
-    t.is(splited[1], '')
-    checkOrderList(t, splited.slice(2, 6))
+    t.is(ret.msg.message, ':robot: はじまるよー！')
     t.is(ret.msg.component, cancelBtn)
     t.is(ret.timers.length, 3)
     t.like(ret.timers[0], {
         time: 5 * 60,
         sound: './assets/ada_well_done.mp3',
     })
-    splited = ret.timers[0].message.message.split('\n')
+    const splited = ret.timers[0].message.message.split('\n')
     t.regex(splited[0], /:robot: 5分たちました! <@[0-9].+> <@[0-9].+> <@[0-9].+>/)
     t.regex(splited[1], /:robot: /)
     checkOrderList(t, splited.slice(2, 6))
@@ -139,7 +142,7 @@ test('mob start with number', async t => {
     // ready
     const message = createMessage('!mob ready', ['aaa', 'bbb', 'ccc'])
     let ret = await mob.exec(message)
-    t.regex(ret.msg.message, /:robot: メンバーは ... ... ... /)
+    t.truthy(ret.msg.message)
     t.is(ret.msg.component, startBtn)
     // start
     const message2 = createMessageChain(message, '!mob start 4')
