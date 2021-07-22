@@ -22,7 +22,7 @@ function createMessage(text, names = [], id = Discord.SnowflakeUtil.generate()) 
     })
     return {
         content: text,
-        channel: { id: Discord.SnowflakeUtil.generate(), send: () => {
+        channel: { id: Discord.SnowflakeUtil.generate(), guild: { members: { cache: new Map() } }, send: () => {
             // empty
         } },
         member: { voice: { channel: {
@@ -34,12 +34,12 @@ function createMessage(text, names = [], id = Discord.SnowflakeUtil.generate()) 
                 } }
             }),
         } } },
-        mentions: { users: new Map() }
+        mentions: { users: new Map() },
     }
 }
 
 function createMember(name, id = Discord.SnowflakeUtil.generate()) {
-    return { user:{ id: id, username: name } }
+    return { id: id, user:{ id: id, username: name }, voice: {} }
 }
 
 function checkOrderList(t, lines) {
@@ -55,6 +55,17 @@ test('ping pong', t => {
     const message = createMessage('!ping')
     const ret = ping.exec(message)
     t.is(ret.msg.message, 'Pong.')
+})
+
+// slow test due to kuromoji
+test('conversation', async t => {
+    const conv = require('./module/conversation.js')
+    const message = createMessage('!ping')
+    t.is((await conv.exec(message)).msg.message, 'なんすか？')
+    message.content = 'モブしたい'
+    t.is((await conv.exec(message)).msg.component, readyBtn)
+    message.content = 'mobしたい'
+    t.is((await conv.exec(message)).msg.component, readyBtn)
 })
 
 test('syuzo', t => {
@@ -112,6 +123,19 @@ test('mob ready', async t => {
         time: 0,
         sound: './assets/ada_morning.mp3',
     })
+})
+
+test('mob ready with id', async t => {
+    let called = false
+    const id = Discord.SnowflakeUtil.generate()
+    const message = createMessage(`!mob ready ${id}`, ['aaa', 'bbb', 'ccc'])
+    const m1 = createMember('A', id)
+    const m2 = createMember('B')
+    m1.voice = { channel: { members: [m1, m2], join: () => { called = true } } }
+    message.channel.guild.members.cache.set(m1.id, m1)
+    message.channel.guild.members.cache.set(m2.id, m2)
+    await mob.exec(message)
+    t.truthy(called)
 })
 
 test('mob start', async t => {
@@ -306,12 +330,14 @@ test('auto leving from vc when bot becomes alone', t => {
 
 test('buttons', t => {
     const buttons = require('./util/button.js')
+    const clickerId = Discord.SnowflakeUtil.generate()
     t.is(buttons.buttons.get('mob-start'), startBtn)
     t.is(buttons.buttons.get('mob-cancel'), cancelBtn)
     t.is(buttons.buttons.get('mob-ready'), readyBtn)
     t.is(buttons.buttons.size, 3)
     t.is(buttons.reply({ id: 'mob-start' }), '!mob start')
     t.is(buttons.reply({ id: 'mob-cancel' }), '!mob cancel')
+    t.is(buttons.reply({ id: 'mob-ready', clicker: { id : clickerId } }), `!mob ready ${clickerId}`)
     t.is(buttons.reply({ id: 'dummy' }), null)
 })
 
@@ -354,3 +380,4 @@ test('task factory progress', async t => {
     t.is(store.TIMERS.get(message).length, 1)
     t.is(store.TIMERS.get(message)[0]._repeat, 10000)
 })
+

@@ -12,12 +12,13 @@ const watcher = require('./module/watch_vc_state.js')
 
 client.once('ready', () => { console.log('Ready!') })
 client.on('message', async message => {
-    if (!message.content.startsWith('!')) { return }
-    const cmd = factory(message.content)
+    if (!(message.content.startsWith('!') || message.mentions.users.has(client.user.id))) { return }
+
+    const cmd = factory(message, client)
     if (!cmd) { return }
     try {
         const ret = await cmd.exec(message)
-        if (ret.msg) { message.channel.send(ret.msg.message, ret.msg.component) }
+        if (ret.msg && ret.msg.message) { message.channel.send(ret.msg.message, ret.msg.component ? ret.msg.component : null) }
         if (ret.timers) { timerutil(ret.timers, message, taskFactory(message)) }
     }
     catch (error) {

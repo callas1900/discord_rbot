@@ -10,7 +10,8 @@ module.exports.exec = async function(message) {
     switch(commands[1]) {
     case 'ready': {
         try {
-            const members = mm.register(message)
+            const id = commands[2] ? commands[2] : null
+            const members = await mm.register(message, id)
             msg.message += pm.textBuilder('ready', [ members ])
             msg.component = startBtn
             clearAll(message)

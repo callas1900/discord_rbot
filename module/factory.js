@@ -1,6 +1,11 @@
-module.exports = function(text) {
+module.exports = function(message, client) {
+    const text = message.content
     let cmd
-    if (text === '!ping') {
+    if (message.mentions.users.has(client.user.id)) {
+        cmd = require('./conversation.js')
+        cmd.id = 'conversation'
+    }
+    else if (text === '!ping') {
         cmd = require('./ping.js')
         cmd.id = 'ping'
     }

@@ -9,12 +9,26 @@ function shuffle(a) {
     }
     return a
 }
-module.exports.register = (message) => {
-    if (!message.member.voice.channel) {
+
+function retriveRegister(message, id) {
+    let register
+    if (id) {
+        const clicker = message.channel.guild.members.cache.get(id)
+        register = clicker.voice.channel ? clicker : null
+    }
+    else {
+        register = message.member.voice.channel ? message.member : null
+    }
+    return register
+}
+
+module.exports.register = async (message, id) => {
+    const register = retriveRegister(message, id)
+    if (!register) {
         throw 'voice チャンネルにjoinしてください'
     }
     const members = []
-    message.member.voice.channel.members.forEach((member) => {
+    register.voice.channel.members.forEach((member) => {
         if (member.user.username != 'rbot') {
             members.push({ 'id': member.user.id, 'name': member.user.username })
         }
@@ -22,6 +36,7 @@ module.exports.register = (message) => {
     if (!DEBUG() && members.length < 2) {
         throw 'ぼっちなのでモブ出来ません'
     }
+    await register.voice.channel.join()
     return shuffle(members)
 }
 module.exports.load = (message) => {
