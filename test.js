@@ -3,8 +3,13 @@ const Discord = require('discord.js')
 const mob = require('./module/mob.js')
 const buttonutil = require('./util/button.js')
 const store = require('./util/store.js')
-const startBtn = buttonutil.buttons.get('mob-start')
-const cancelBtn = buttonutil.buttons.get('mob-cancel')
+const startBtn = buttonutil.buttons.get('mob-start'),
+    cancelBtn = buttonutil.buttons.get('mob-cancel'),
+    readyBtn = buttonutil.buttons.get('mob-ready')
+
+function createClient(id = Discord.SnowflakeUtil.generate()) {
+    return { user: { id: id }, voice: { connections: new Map() } }
+}
 
 function createMessageChain(message, text, names = []) {
     return createMessage(text, names, message.member.voice.channel.id)
@@ -28,7 +33,9 @@ function createMessage(text, names = [], id = Discord.SnowflakeUtil.generate()) 
                     // empty
                 } }
             }),
-        } } } }
+        } } },
+        mentions: { users: new Map() }
+    }
 }
 
 function createMember(name, id = Discord.SnowflakeUtil.generate()) {
@@ -47,7 +54,7 @@ test('ping pong', t => {
     const ping = require('./module/ping.js')
     const message = createMessage('!ping')
     const ret = ping.exec(message)
-    t.is(ret.msg, 'Pong.')
+    t.is(ret.msg.message, 'Pong.')
 })
 
 test('syuzo', t => {
@@ -197,17 +204,19 @@ test('mob cancel', async t => {
 test('factory no command', t => {
     const factory = require('./module/factory.js')
     const message = createMessage('ping')
-    t.is(factory(message.content), undefined)
+    const client = createClient()
+    t.is(factory(message, client), undefined)
 })
 
 test('factory', t => {
     const factory = require('./module/factory.js')
+    const client = createClient()
     let message = createMessage('!ping')
-    t.is(factory(message.content).id, 'ping')
+    t.is(factory(message, client).id, 'ping')
     message = createMessage('!mob')
-    t.is(factory(message.content).id, 'mob')
+    t.is(factory(message, client).id, 'mob')
     message = createMessage('!syuzo')
-    t.is(factory(message.content).id, 'syuzo')
+    t.is(factory(message, client).id, 'syuzo')
 })
 
 test('timer util', t => {
@@ -263,6 +272,7 @@ test('timer util with sound', t => {
 
 function setupClient(checker, isConnection, memberNumber) {
     const botId = Discord.SnowflakeUtil.generate()
+    const client = createClient(botId)
     const members = new Map().set(botId, '')
     for (let i = 0; i < memberNumber; i++) {
         members.set(Discord.SnowflakeUtil.generate(), '')
@@ -271,7 +281,8 @@ function setupClient(checker, isConnection, memberNumber) {
     if (isConnection) {
         connections.set(Discord.SnowflakeUtil.generate(), { channel: { id: Discord.SnowflakeUtil.generate(), members: members, leave: checker } })
     }
-    return { user: { id: botId }, voice: { connections: connections } }
+    client.voice.connections = connections
+    return client
 }
 
 test('auto leving from vc when bot becomes alone', t => {
@@ -297,7 +308,8 @@ test('buttons', t => {
     const buttons = require('./util/button.js')
     t.is(buttons.buttons.get('mob-start'), startBtn)
     t.is(buttons.buttons.get('mob-cancel'), cancelBtn)
-    t.is(buttons.buttons.size, 2)
+    t.is(buttons.buttons.get('mob-ready'), readyBtn)
+    t.is(buttons.buttons.size, 3)
     t.is(buttons.reply({ id: 'mob-start' }), '!mob start')
     t.is(buttons.reply({ id: 'mob-cancel' }), '!mob cancel')
     t.is(buttons.reply({ id: 'dummy' }), null)

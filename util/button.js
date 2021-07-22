@@ -1,6 +1,7 @@
 const { MessageButton } = require('discord-buttons')
 const startId = 'mob-start'
 const cancelId = 'mob-cancel'
+const readyId = 'mob-ready'
 module.exports.buttons = new Map()
     .set(startId, new MessageButton()
         .setStyle('green')
@@ -10,6 +11,10 @@ module.exports.buttons = new Map()
         .setStyle('red')
         .setLabel('cancel')
         .setID(cancelId))
+    .set(readyId, new MessageButton()
+        .setStyle('blurple')
+        .setLabel('ready')
+        .setID(readyId))
 module.exports.reply = function(button) {
     let message
     switch (button.id) {
@@ -18,6 +23,9 @@ module.exports.reply = function(button) {
         break
     case cancelId:
         message = '!mob cancel'
+        break
+    case readyId:
+        message = `!mob ready ${button.clicker.id}`
         break
     default:
         message = null

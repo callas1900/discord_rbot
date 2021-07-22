@@ -1,4 +1,4 @@
 module.exports.exec = function(_message) {
-    return { msg: 'Pong.' }
+    return { msg: { message: 'Pong.' } }
 }
 
