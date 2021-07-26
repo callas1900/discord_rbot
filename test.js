@@ -22,7 +22,7 @@ function createMessage(text, names = [], id = Discord.SnowflakeUtil.generate()) 
     })
     return {
         content: text,
-        channel: { id: Discord.SnowflakeUtil.generate(), guild: { members: { cache: new Map() } }, send: () => {
+        channel: { id: Discord.SnowflakeUtil.generate(), members: new Map(), guild: { members: { cache: new Map() } }, send: () => {
             // empty
         } },
         member: { voice: { channel: {
@@ -34,6 +34,7 @@ function createMessage(text, names = [], id = Discord.SnowflakeUtil.generate()) 
                 } }
             }),
         } } },
+        author: { id: id },
         mentions: { users: new Map() },
     }
 }
@@ -223,6 +224,35 @@ test('mob cancel', async t => {
     t.is(splited[0], ':robot: はいよ！')
     checkOrderList(t, splited.slice(1, 5))
     t.is(ret.timers.length, 0)
+})
+
+test('mob ninja no permission', async t => {
+    // mock
+    const client = createClient()
+    store.setClient(client)
+    const message = createMessage('!mob ninja')
+    message.channel.members.set(client.user.id, { hasPermission: () => { return false } })
+    // test
+    t.is((await mob.exec(message)).msg.message, ':robot: `MANAGE_MESSAGES` の権限はあっしにはねーっす')
+})
+
+test('mob ninja', async t => {
+    // mock
+    let called = false
+    const client = createClient()
+    store.setClient(client)
+    const message = createMessage('!mob ninja')
+    message.channel.members.set(client.user.id, { hasPermission: () => { return true } })
+    const messages = new Map()
+    const botMessage = createMessage('', [], client.user.id)
+    botMessage.delete = () => { called = true}
+    const anotherMessage = createMessage('', [])
+    messages.set(botMessage.id, botMessage)
+    messages.set(anotherMessage.id, anotherMessage)
+    message.channel.messages = { fetch: () => { return [botMessage, anotherMessage] } }
+    // test
+    t.is((await mob.exec(message)).msg.message, ':robot: どろん！ 1 の発言を消去')
+    t.truthy(called)
 })
 
 test('factory no command', t => {

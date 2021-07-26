@@ -1,5 +1,5 @@
 const buttonutil = require('../util/button.js')
-const { MEMBERS, TIMERS, clearAll } = require('../util/store.js')
+const { MEMBERS, TIMERS, clearAll, client } = require('../util/store.js')
 const pm = require('./_process_manager.js'), mm = require('./_member_manager.js')
 const startBtn = buttonutil.buttons.get('mob-start'), cancelBtn = buttonutil.buttons.get('mob-cancel')
 
@@ -49,6 +49,21 @@ module.exports.exec = async function(message) {
         msg.message += pm.textBuilder('cancel', [ MEMBERS.get(message) ])
         msg.component = startBtn
         timers = []
+        break
+    }
+    case 'ninja': {
+        if (!message.channel.members.get(client().user.id).hasPermission('MANAGE_MESSAGES')) {
+            msg.message += '`MANAGE_MESSAGES` の権限はあっしにはねーっす'
+        }
+        else {
+            const messages = await message.channel.messages.fetch({ limit:100 })
+            let count = 0
+            messages.filter(m => m.author.id === client().user.id).forEach((m) => {
+                m.delete()
+                count++
+            })
+            msg.message += `どろん！ ${count} の発言を消去`
+        }
         break
     }
     case 'debug': {
