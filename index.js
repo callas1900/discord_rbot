@@ -17,12 +17,16 @@ client.on('message', async message => {
     const cmd = factory(message, client)
     if (!cmd) { return }
     try {
+        message.channel.startTyping()
         const ret = await cmd.exec(message)
         if (ret.msg && ret.msg.message) { message.channel.send(ret.msg.message, ret.msg.component ? ret.msg.component : null) }
         if (ret.timers) { timerutil(ret.timers, message, taskFactory(message)) }
     }
     catch (error) {
         console.error(error)
+    }
+    finally {
+        message.channel.stopTyping()
     }
 })
 client.on('clickButton', async (btn) => {
