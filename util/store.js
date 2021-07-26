@@ -73,6 +73,10 @@ module.exports.clearAllById = (id) => {
         store.remove(id)
     })
 }
+let _client
+module.exports.client = () => { return _client }
+module.exports.setClient = (client) => { _client = client }
+
 let debug = false
 module.exports.DEBUG = () => { return debug }
 module.exports.setDebug = (input) => { debug = input }

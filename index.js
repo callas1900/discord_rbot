@@ -5,12 +5,16 @@ require('discord-buttons')(client)
 const dotenv = require('dotenv')
 dotenv.config()
 const factory = require('./module/factory.js')
+const watcher = require('./module/watch_vc_state.js')
 const timerutil = require('./util/timer.js')
 const taskFactory = require('./util/task.js')
 const buttons = require('./util/button.js')
-const watcher = require('./module/watch_vc_state.js')
+const { setClient } = require('./util/store.js')
 
-client.once('ready', () => { console.log('Ready!') })
+client.once('ready', () => {
+    setClient(client)
+    console.log('Ready!')
+})
 client.on('message', async message => {
     if (!(message.content.startsWith('!') || message.mentions.users.has(client.user.id))) { return }
 
