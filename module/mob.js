@@ -1,6 +1,7 @@
 const buttonutil = require('../util/button.js')
 const { MEMBERS, TIMERS, clearAll, client } = require('../util/store.js')
-const pm = require('./_process_manager.js'), mm = require('./_member_manager.js')
+const pm = require('./_process_manager.js'), mm = require('./_member_manager.js'),
+    { TimerBuilder, loadTimers } = require('./_timer_builder.js')
 const startBtn = buttonutil.buttons.get('mob-start'), cancelBtn = buttonutil.buttons.get('mob-cancel')
 
 module.exports.exec = async function(message) {
@@ -21,7 +22,7 @@ module.exports.exec = async function(message) {
             msg.message += error
             break
         }
-        timers = [pm.TimerBuilder().setSound('./assets/ada_morning.mp3')]
+        timers = [TimerBuilder().setSound('./assets/ada_morning.mp3')]
         break
     }
     case 'start': {
@@ -39,10 +40,10 @@ module.exports.exec = async function(message) {
         }
         mm.rotate(message, members)
         const timer_msg = pm.textBuilder('start-timer', [ members, time ])
-        timers = [ pm.TimerBuilder().setMessage(timer_msg)
+        timers = [ TimerBuilder().setMessage(timer_msg)
             .setComponent(startBtn).setTime(time * 60).setSound('./assets/ada_well_done.mp3'),
-        pm.TimerBuilder().setMessage(':robot: 後1分！！！！！！').setTime((time - 1) * 60),
-        pm.TimerBuilder().setProgress('*'.repeat(time * 6))]
+        TimerBuilder().setMessage(':robot: 後1分！！！！！！').setTime((time - 1) * 60),
+        TimerBuilder().setProgress('*'.repeat(time * 6))]
         break
     }
     case 'cancel': {
@@ -72,12 +73,12 @@ module.exports.exec = async function(message) {
     }
     case 'fire': {
         timers = [
-            pm.TimerBuilder().setMessage(':robot: ベクターキャノンモードヘ移行').setSound('./assets/ada_vector_canon.mp3'),
-            pm.TimerBuilder().setMessage(':robot: エネルギーライン、全段直結').setTime(5),
-            pm.TimerBuilder().setMessage(':robot: ランディングギア、アイゼン、ロック').setTime(8),
-            pm.TimerBuilder().setMessage(':robot: チャンバー内、正常加圧中').setTime(11),
-            pm.TimerBuilder().setMessage(':robot: ライフリング回転開始').setTime(14),
-            pm.TimerBuilder().setMessage(':robot: 撃てます').setTime(16)]
+            TimerBuilder().setMessage(':robot: ベクターキャノンモードヘ移行').setSound('./assets/ada_vector_canon.mp3'),
+            TimerBuilder().setMessage(':robot: エネルギーライン、全段直結').setTime(5),
+            TimerBuilder().setMessage(':robot: ランディングギア、アイゼン、ロック').setTime(8),
+            TimerBuilder().setMessage(':robot: チャンバー内、正常加圧中').setTime(11),
+            TimerBuilder().setMessage(':robot: ライフリング回転開始').setTime(14),
+            TimerBuilder().setMessage(':robot: 撃てます').setTime(16)]
         break
     }
     default: {
@@ -85,6 +86,6 @@ module.exports.exec = async function(message) {
         break
     }
     }
-    return { msg: msg, timers: (timers && timers.length > 0) ? pm.loadTimers(timers) : timers }
+    return { msg: msg, timers: (timers && timers.length > 0) ? loadTimers(timers) : timers }
 }
 
