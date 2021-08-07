@@ -1,4 +1,5 @@
 const { DEBUG, setDebug } = require('../util/store.js')
+const { client } = require('../util/store.js')
 
 module.exports.getTime = (input) => {
     const time = input ? (isNaN(input)) ? -99 : eval(input) : 5
@@ -10,6 +11,13 @@ module.exports.getTime = (input) => {
 
 function getOrderText(members) {
     return `\n${'-'.repeat(20)}\n:red_car: driver        => [${members[0].name}]\n:map: navigator => [${members[(DEBUG()) ? 0 : 1].name}]\n${'-'.repeat(20)}`
+}
+
+module.exports.getMessages = async channel => {
+    if (!channel.members.get(client().user.id).hasPermission('MANAGE_MESSAGES')) {
+        throw '`MANAGE_MESSAGES` の権限はあっしにはねーっす'
+    }
+    return await channel.messages.fetch({ limit:100 })
 }
 
 module.exports.textBuilder = (cmd, args = []) => {
@@ -45,6 +53,16 @@ module.exports.textBuilder = (cmd, args = []) => {
         const members = args[0]
         text += 'はいよ！'
         text += getOrderText(members)
+        break
+    }
+    case 'ninja': {
+        const messages = args[0]
+        let count = 0
+        messages.filter(m => m.author.id === client().user.id).forEach(m => {
+            m.delete()
+            count++
+        })
+        text += `どろん！ ${count} の発言を消去`
         break
     }
     case 'debug': {
